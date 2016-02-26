@@ -1,0 +1,132 @@
+---
+title: "Geospatial analysis in R"
+author: "Philippe Marchand"
+output: 
+  md_document:
+    variant: markdown_github
+---
+
+# Geospatial analysis in R
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Outline
+
+- load vector layers (points, lines or polygons)
+- operations on single vector layers: plot, subset, coordinate transformation
+- operations on many vector layers: overlay, union, intersection, distance
+- load raster layer, plot and query values
+- filtering (mask) and aggregation on raster layer
+- crop raster layer to polygon, extract raster values for points and polygons
+
+
+
+US county boundaries from:
+http://www2.census.gov/geo/tiger/GENZ2014/shp/cb_2014_us_county_500k.zip
+
+```{r load_counties}
+library(rgdal)
+cb_dir <- "/nfs/public-data/census-tiger-2013/cb_2014_us_county_500k"
+counties <- readOGR(dsn = file.path(cb_dir, "cb_2014_us_county_500k.shp"),
+                    layer = "cb_2014_us_county_500k",
+                    stringsAsFactors = FALSE)
+plot(counties)
+```
+
+
+```{r extract_md}
+counties_md <- counties[counties$STATEFP == "24", ]
+rm(counties)
+
+plot(counties_md)
+
+sesync <- SpatialPoints(cbind(-76.505206, 38.9767231), 
+                        proj4string = CRS(proj4string(counties_md)))
+
+plot(sesync, col = "green", add = TRUE)
+over(sesync, counties_md)
+```
+
+
+USGS hydrological unit (HUC) shapefile downloaded at http://water.usgs.gov/GIS/dsdl/huc250k_shp.zip.
+
+```{r load_huc}
+huc <- readOGR(dsn = "Geodata/huc250k.shp", layer = "huc250k", 
+               stringsAsFactors = FALSE)
+huc <- spChFIDs(huc, paste(1:length(huc), huc$HUC_NAME))
+```
+
+```{r plot_over}
+proj1 <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
+counties_md <- spTransform(counties_md, proj1)
+huc <- spTransform(huc, proj1)
+plot(counties_md)
+plot(huc, add = TRUE, border = "blue")
+```
+
+
+
+```{r union_intersect}
+library(rgeos)
+state_md <- gUnaryUnion(counties_md)
+plot(state_md)
+huc_md <- gIntersection(huc, state_md, byid = TRUE)
+
+plot(huc_md, border = "blue")
+text(coordinates(huc_md), labels = names(huc_md), cex = 0.7)
+
+gDistance(huc_md[1], huc_md[31])
+
+rm(huc)
+```
+
+
+
+National Land Cover Database: http://www.mrlc.gov/nlcd2011.php.
+
+```{r load_raster}
+library(raster)
+nlcd <- raster("Geodata/nlcd_cropped.grd")
+nlcd
+plot(nlcd)
+```
+
+```{r crop_raster}
+nlcd <- crop(nlcd, extent(huc_md))
+plot(nlcd)
+
+nlcd[1,1]
+#View(nlcd@data@attributes)
+
+lc_types <- nlcd@data@attributes[[1]]$Land.Cover.Class
+
+```
+
+```{r agg_raster}
+nlcd_agg <- aggregate(nlcd, fact = 5, fun = modal) # 3 minutes
+nlcd_agg@legend <- nlcd@legend
+plot(nlcd_agg)
+```
+
+```{r mask}
+pasture <- mask(nlcd_agg, nlcd_agg == 81, maskvalue = FALSE)
+plot(pasture)
+```
+
+
+```{r extract}
+sesync <- spTransform(sesync, proj1)
+sesync_lc <- extract(nlcd, sesync)
+lc_types[sesync_lc + 1]
+
+huc_nlcd <- extract(nlcd_agg, huc_md[1])
+table(huc_nlcd)
+
+modal_lc <- extract(nlcd_agg, huc_md, fun = modal) # 1 minute
+modal_lc <- lc_types[modal_lc + 1]
+data.frame(names(huc_md), modal_lc)
+```
+
+
