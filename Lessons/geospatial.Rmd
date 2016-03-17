@@ -13,8 +13,8 @@ This lesson presents a brief overview of some of the key R packages for geospati
 - [load and plot vector layers](#importing-vector-data) (points, lines and polygons);
 - [subset vector layers](#subsetting-vector-layers) based on associated data or on another layer (overlay);
 - read projections and [transform coordinates](#coordinate-transformations);
-- perform [geometric operations](#geometric-operations-on-vector-layers) (union, intersection and distance) on polygon layers;
-- load, subset and plot raster layers (grids of pixels);
+- perform [geometric operations](#geometric-operations-on-vector-layers) (union, intersection and buffering) on polygon layers;
+- [load, subset and plot raster layers](#working-with-raster-data) (grids of pixels);
 - filter (mask) and aggregate raster pixels;
 - extract raster values by overlaying a vector layer.
 
@@ -27,9 +27,9 @@ We start by importing a layer of polygons corresponding to US counties. The data
 
 In the code below, we load two R packages: **sp** and **rgdal**. The former defines spatial data classes in R and is thus a prerequisite for most other spatial analyses packages; the latter is an interface to the open source Geospatial Data Abstraction Library (GDAL) that enables R to import spatial data stored in different file formats. Note that to use rgdal on your personal computer, you need to first [install GDAL](http://trac.osgeo.org/gdal/wiki/DownloadingGdalBinaries).
 
-To import a .shp shapefile, we call the `readOGR` function from rgdal. This function takes at minimum two arguments, corresponding to the file location (dsn) and layer name (layer); in general, the layer name should match the filename without its extension.
+To import a .shp shapefile, we call the `readOGR` function from rgdal. This function takes at minimum two arguments, corresponding to the file location (`dsn`) and layer name (`layer`); in general, the layer name should match the filename without its extension.
 
-```{r load_counties}
+```{r load_counties, message=FALSE, warning=FALSE}
 library(sp)
 library(rgdal)
 cb_dir <- "/nfs/public-data/census-tiger-2013/cb_2014_us_county_500k"
@@ -37,7 +37,7 @@ counties <- readOGR(dsn = file.path(cb_dir, "cb_2014_us_county_500k.shp"),
                     layer = "cb_2014_us_county_500k", stringsAsFactors = FALSE)
 ```
 
-Because each polygon in the shapefile has attached data, the resulting object is a *SpatialPolygonsDataFrame*. (Note that the `stringsAsFactors` argument we specified works the same as for regular data frames.) By exploring its structure in the RStudio Environment tab, we see that it contains a data frame (`counties@data`) and a list of polygons (`counties@polygons`). Although we cannot see the full object under Environment, you can type `counties@proj4string` or `counties@bbox` in the R console to see the layer's projection information and its bounding box, respectively. A *SpatialPolygons* object is polygon layer with the same components, but no attached `@data`. Analogous classes exist for point (*SpatialPoints[DataFrame]*) and line (*SpatialLines[DataFrame]*) layers.
+Because each polygon in the shapefile has attached data, the resulting object is a *SpatialPolygonsDataFrame*. (Note that the `stringsAsFactors` argument we specified works the same as for regular data frames.) By exploring its structure in the RStudio Environment tab, we see that it contains a data frame (`counties@data`) and a list of polygons (`counties@polygons`). Although we cannot see the full object under Environment, you can type `counties@proj4string` or `counties@bbox` in the R console to see the layer's projection information and its bounding box, respectively. A *SpatialPolygons* object is a polygon layer with the same components, but no attached `@data`. Analogous classes exist for point (*SpatialPoints*, *SpatialPointsDataFrame*) and line (*SpatialLines*, *SpatialLinesDataFrame*) layers.
 
 *Note*: The reason why we use "@" rather than "$" to access parts of this object has to do with object-oriented programming systems in R and is beyond the scope of this lesson. However, you can always look at the structure of an object, either with the `str()` function or in the RStudio Environment tab, to know which of the two characters applies.
 
@@ -59,6 +59,7 @@ We joined the *x* and *y* values with `cbind` rather than `c` since the input co
 
 When two spatial layers share the same coordinate system, they can be superposed on the same plot. The spatial version of `plot` accepts an `add` parameter to add a layer to the last plot. It also accepts standard R graphical parameters such as color (`col`) and point shape (`pch`).
 ```{r plot_point}
+plot(counties, xlim = c(-125, -65), ylim = c(20, 50))
 plot(sesync, col = "green", pch = 20, add = TRUE)
 ```
 
@@ -69,9 +70,9 @@ A *Spatial...DataFrame* can be subset with expressions in brackets, just like a 
 ```{r subset_md}
 counties_md <- counties[counties$STATEFP == "24", ]  # 24 is the FIPS code for Maryland
 plot(counties_md)
-rm(counties) # remove counties map to free up memory
 ```
-The code above selects specific rows (corresponding to counties in Maryland) along with the polygons corresponding to those rows. In contrast, subsetting by columns would only affect the data component.
+
+The code above selects specific rows (corresponding to counties in Maryland) along with the polygons corresponding to those rows. In contrast, subsetting by columns would only affect the data frame component.
 
 A spatial *overlay* operation can be seen as a type of subset based on spatial (rather than data) matching. It is implemented with the `over(sp1, sp2)` function in sp. The exact output depends on the type of layers being matched; if *sp1* is a *SpatialPoints* layer and *sp2* is a *SpatialPolygonsDataFrame*, the function finds the polygon(s), if any, containing each point in *sp1* and returns the corresponding rows of *sp2*. 
 ```{r pt_poly_overlay}
@@ -86,10 +87,9 @@ Produce a map of Maryland counties with Frederick County colored in red.
 ## Coordinate transformations
 
 For the next part of this lesson, we import a new polygon layer corresponding to the 1:250k map of US hydrological units (HUC) downloaded from the United States Geological Survey (http://water.usgs.gov/GIS/dsdl/huc250k_shp.zip).
-```{r load_huc}
+```{r load_huc, message=FALSE, warning=FALSE}
 huc <- readOGR(dsn = "../Geodata/huc250k.shp", layer = "huc250k", 
                stringsAsFactors = FALSE)
-#huc <- spChFIDs(huc, paste(1:length(huc), huc$HUC_NAME))
 ```
 
 While the counties data uses unprojected (longitude, latitude) coordinates, *huc* has an Albers equal-area projection (indicated as "+proj=aea"). 
@@ -99,7 +99,7 @@ proj4string(huc)
 ```
 Other parameters differ between the two projections, such as the "datum", which indicates the standard by which the irregular surface of the Earth is approximated by an ellipsoid. 
 
-Fortunately, the rgdal package provides us with a generic function (`spTransform`) to convert spatial objects between any two coordinate systems expressed in standard proj4string notation. In the code below, we input a projection string (*proj1*) matching a different version of the Albers equal-area projection and transform both our polygons layers to that coordinate system. (We define this particular projection is to match yet another data source we will import later in this lesson.) This allows us to plot both layers together in the same map.
+Fortunately, the rgdal package provides us with a generic function (`spTransform`) to convert spatial objects between any two coordinate systems expressed in standard proj4string notation. In the code below, we input a projection string (*proj1*) matching a different version of the Albers equal-area projection and transform both our polygons layers to that coordinate system. (We define this particular projection to match yet another data source that we will import later in this lesson.) This allows us to plot both layers on the same map.
 
 ```{r plot_over}
 proj1 <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"
@@ -112,23 +112,36 @@ plot(huc, add = TRUE, border = "blue")
 
 ## Geometric operations on vector layers
 
-*** CONTINUE HERE ***
+The **rgeos** package, a R interface to the open source geometry engine GEOS (http://trac.osgeo.org/geos/), provides various functions to modify and transform the geometric objects in one or more vector layers.
 
-```{r union_intersect}
+The last map we produced in the previous section (MD counties and hydrological units) is rather hard to read. Let's consider the following improvements:
+
+- to reduce the number of lines, remove the county boundaries within the state;
+- crop the HUC layer to only show the parts of hydrological units contained within the state boundaries.
+
+The first step is a spatial **union** operation: we want the resulting object to combine the area covered by all the *Polygons* in `counties_md`. To perform a union of all sub-geometries in a single spatial object, we use the rgeos `gUnaryUnion` function. (This differs from the `gUnion` function which returns the union of two spatial objects.) 
+```{r gUnion, message=FALSE, warning=FALSE}
 library(rgeos)
 state_md <- gUnaryUnion(counties_md)
 plot(state_md)
-huc_md <- gIntersection(huc, state_md, byid = TRUE)
-
-plot(huc_md, border = "blue")
-text(coordinates(huc_md), labels = names(huc_md), cex = 0.7)
-
-gDistance(huc_md[1], huc_md[31])
-
-rm(huc)
 ```
 
+The second step is a spatial **intersection**, since we want the resulting object to be limited to the areas covered by both *huc* and *state_md*. The `byid = TRUE` argument indicates that the intersection should be performed separately for each polygon within *huc*; this way, the individual hydrological units are preserved but any part of them (or any whole polygon) lying outside the *state_md* polygon is cut from the output. In the `id` argument, we specify meaningful labels for each resulting polygon, by pasting a unique number to the name of each hydrological unit from the original *huc* data. (Note that the result of `gIntersection` is a *SpatialPolygons* object with no attached data.)
+```{r gIntersect}
+huc_md <- gIntersection(huc, state_md, byid = TRUE, 
+                        id = paste(1:length(huc), huc$HUC_NAME))
+plot(huc_md, border = "blue")
+text(coordinates(huc_md), labels = names(huc_md), cex = 0.6, srt = 30)
+```
 
+The rgeos package also includes functions to create a buffer of specific width around a geometry (`gBuffer`), to calculate the shortest distance between geometries (`gDistance`) and the area of polygons (`gArea`). Keep in mind however that all these functions use planar geometry equations and thus become less precise over larger distances, as the effect of the Earth's curvature become non-negligible. To calculate geodesic distances that account for that curvature, check the **geosphere** package.
+
+### Exercise
+
+Create a 5km buffer around the *state_md* borders and plot it as a dotted line (`plot(..., lty = "dotted")`) on the same map. *Hint*: Check the layer's units with `proj4string()` and express any distance in those units.
+
+
+## Working with raster data
 
 National Land Cover Database: http://www.mrlc.gov/nlcd2011.php.
 
