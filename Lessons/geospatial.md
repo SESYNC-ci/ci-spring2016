@@ -49,7 +49,7 @@ The spatial objects defined by the sp package are compatible with the base R `pl
 plot(counties, xlim = c(-125, -65), ylim = c(20, 50))
 ```
 
-![](geospatial_files/figure-markdown_github/plot_counties-1.png)<!-- -->
+![](geospatial_files/figure-markdown_github/plot_counties-1.png)
 
 Instead of importing a shapefile, we can build spatial objects from coordinate matrices in R. Let's create a *SpatialPoints* object with a single point, corresponding to SESYNC's coordinates in decimal degrees.
 
@@ -67,7 +67,7 @@ plot(counties, xlim = c(-125, -65), ylim = c(20, 50))
 plot(sesync, col = "green", pch = 20, add = TRUE)
 ```
 
-![](geospatial_files/figure-markdown_github/plot_point-1.png)<!-- -->
+![](geospatial_files/figure-markdown_github/plot_point-1.png)
 
 Subsetting vector layers
 ------------------------
@@ -79,7 +79,7 @@ counties_md <- counties[counties$STATEFP == "24", ]  # 24 is the FIPS code for M
 plot(counties_md)
 ```
 
-![](geospatial_files/figure-markdown_github/subset_md-1.png)<!-- -->
+![](geospatial_files/figure-markdown_github/subset_md-1.png)
 
 The code above selects specific rows (corresponding to counties in Maryland) along with the polygons corresponding to those rows. In contrast, subsetting by columns would only affect the data frame component.
 
@@ -139,7 +139,7 @@ plot(counties_md)
 plot(huc, add = TRUE, border = "blue")
 ```
 
-![](geospatial_files/figure-markdown_github/plot_over-1.png)<!-- -->
+![](geospatial_files/figure-markdown_github/plot_over-1.png)
 
 Geometric operations on vector layers
 -------------------------------------
@@ -159,7 +159,7 @@ state_md <- gUnaryUnion(counties_md)
 plot(state_md)
 ```
 
-![](geospatial_files/figure-markdown_github/gUnion-1.png)<!-- -->
+![](geospatial_files/figure-markdown_github/gUnion-1.png)
 
 The second step is a spatial **intersection**, since we want the resulting object to be limited to the areas covered by both *huc* and *state\_md*. The `byid = TRUE` argument indicates that the intersection should be performed separately for each polygon within *huc*; this way, the individual hydrological units are preserved but any part of them (or any whole polygon) lying outside the *state\_md* polygon is cut from the output. In the `id` argument, we specify meaningful labels for each resulting polygon, by pasting a unique number to the name of each hydrological unit from the original *huc* data. (Note that the result of `gIntersection` is a *SpatialPolygons* object with no attached data.)
 
@@ -170,7 +170,7 @@ plot(huc_md, border = "blue")
 text(coordinates(huc_md), labels = names(huc_md), cex = 0.6, srt = 30)
 ```
 
-![](geospatial_files/figure-markdown_github/gIntersect-1.png)<!-- -->
+![](geospatial_files/figure-markdown_github/gIntersect-1.png)
 
 The rgeos package also includes functions to create a buffer of specific width around a geometry (`gBuffer`), to calculate the shortest distance between geometries (`gDistance`) and the area of polygons (`gArea`). Keep in mind however that all these functions use planar geometry equations and thus become less precise over larger distances, as the effect of the Earth's curvature become non-negligible. To calculate geodesic distances that account for that curvature, check the **geosphere** package.
 
@@ -208,7 +208,7 @@ nlcd # show raster properties
 plot(nlcd)
 ```
 
-![](geospatial_files/figure-markdown_github/load_raster-1.png)<!-- -->
+![](geospatial_files/figure-markdown_github/load_raster-1.png)
 
 As shown in the code above, we can access the properties of a raster by simply typing its name in the console. By default, the whole raster is *not* loaded into working memory, as you can confirm by checking the R object size with `object.size(nlcd)`. This means that unlike most analyses in R, you can actually process raster datasets larger than the RAM available on your computer; the raster package automatically loads pieces of the data and computes on each of them in sequence.
 
@@ -220,7 +220,7 @@ plot(nlcd)
 plot(huc_md, add = TRUE)
 ```
 
-![](geospatial_files/figure-markdown_github/crop_raster-1.png)<!-- -->
+![](geospatial_files/figure-markdown_github/crop_raster-1.png)
 
 Note that the transformed raster is now loaded in R memory, as indicated by the size of `nlcd`. We could have also saved the output to disk by specifying an optional `filename` argument to `crop`; the same is true for othe raster transformation functions.
 
@@ -271,7 +271,7 @@ pasture <- mask(nlcd, nlcd == 81, maskvalue = FALSE)
 plot(pasture)
 ```
 
-![](geospatial_files/figure-markdown_github/mask-1.png)<!-- -->
+![](geospatial_files/figure-markdown_github/mask-1.png)
 
 The `cellStats` function calculates a summary statistic (e.g. `cellStats(r1, "mean")`) across the entire raster layer. Alternatively, we can `aggregate` values locally in a raster, for blocks of a given size, which produces a raster with a lower resolution.
 
@@ -281,7 +281,7 @@ nlcd_agg@legend <- nlcd@legend
 plot(nlcd_agg)
 ```
 
-![](geospatial_files/figure-markdown_github/agg_raster-1.png)<!-- -->
+![](geospatial_files/figure-markdown_github/agg_raster-1.png)
 
 Here, `fact = 5` means that we are aggregating blocks 5 x 5 pixels and `fun = modal` indicates that the aggregate value is the mode of the original pixels (averaging would not work since land cover is a categorical variable).
 
