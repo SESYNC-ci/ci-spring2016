@@ -41,7 +41,11 @@ Because each polygon in the shapefile has attached data, the resulting object is
 
 Each of the *Polygons* object in a *SpatialPolygons* or *SpatialPolygonsDataFrame* contains one or more *Polygon* objects, which are simple polygons in the geometric sense; a single *Polygons* object can thus be a complex shape combining many polygons with holes in them. The `@coords` slot of a *Polygon* is a matrix with the (*x*,*y*) coordinates of each vertex, with the first and last vertices being identical to form a "closed" shape.
 
-***ADD FIGURE FROM SPATIAL BOOK ABOUT OBJECT STRUCTURE***
+![](geospatial_files/bivand_fig_2_4.png)
+
+*Source: Bivand et al. (2013), Applied Spatial Data Analysis with R, p.40*
+
+The diagram above summarizes the hierarchical structure of *SpatialPolygons* (and *SpatialLines*) objects. Although we will only deal with the full spatial objects in this lesson, understanding this structure is useful for more complex operations, e.g. when you need to apply a custom function on each individual polygon.
 
 The spatial objects defined by the sp package are compatible with the base R `plot` function. We now plot the counties map, setting *x* and *y* limits to only display the continental US.
 
@@ -355,7 +359,7 @@ data.frame(names(huc_md), modal_lc)
     ## 28               1121 Blackwater-Wicomico              Cultivated Crops
     ## 29                     1128 Lower Potomac              Deciduous Forest
     ## 30                            1164 Severn              Cultivated Crops
-    ## 31              1190 Lower Chesapeake Bay Emergent Herbaceuous Wetlands
+    ## 31              1190 Lower Chesapeake Bay                    Open Water
 
 For a more detailed introduction to the raster package, you can consult [this vignette in CRAN](http://cran.r-project.org/web/packages/raster/vignettes/Raster.pdf).
 
