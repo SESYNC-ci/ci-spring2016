@@ -1,12 +1,12 @@
 ---
-  title: "Interactive web applications with RShiny"
+title: "Interactive web applications with RShiny"
 author: "Kelly Hondula"
-output: 
+output:
   md_document:
-  variant: markdown_github
+    variant: markdown_github
 ---
   
-  # Interactive web applications in R
+# Interactive web applications in R
   
   This lesson presents an introduction to creating interactive web applications using the Shiny package in R. We will cover the following concepts:
   
@@ -28,77 +28,96 @@ Make sure the shiny package is installed and loaded
 
 A shiny app consists of two components:
 
-* **ui** which defines the user interface with the main function `fluidPage()`
+* **user interface** which defines what users will see in the app
 * **server** which defines the instructions for assembling components of the app as a function of input and output objects
 
 There are two ways to structure an app:
 
 1. Create one file called `app.R`. In this file, define objects `ui` and `server` with the assignment operator `<-` and then pass them to the function `shinyApp()`. 
-2. Split the template into two files named `ui.R` and `server.R`. 
+2. Split the template into two files named `ui.R` and `server.R`.
 
-When the `shiny` package is installed and loaded, RStudio will identify this file structure and create a green arrow with a "Run App" button when you open a file in the app. Applications use your current R session and are displayed in a browser window.
+We will use the second option here to make an app. When the `shiny` package is installed and loaded, RStudio will identify this file structure and create a green arrow with a "Run App" button when you open a file in the app. Applications use your current R session and are displayed in a browser window.
 
 Test this by looking at an example within the shiny package:
 
-```{r}
-# runExample("01_hello")
+```{r, eval=FALSE}
+
+runExample("01_hello")
+
 ```
 
 Notice the stop sign that appears in the Console window while your app is running. This is because it is using the current R session. Make sure to end the app by either closing the external window or clicking the stop sign. 
 
-## Input objects
+Create a new folder in your current working directory with ui and server files, and a copy of the data folder. Read in the data in the server file and display a title in the user interface file
 
-The user interface and the server file interact with each other through __*Input()__ and __*Output()__ functions. 
+```{r, eval = FALSE}
+# ui.R
 
-Input objects collect information from the user and saves them based on the name given to the `inputId =` argument. Input objects also have a `label =` which is displayed to the user, as well as other values based on the type of input widget. 
-
-Input objects are **reactive** which means that an update to this value by a user notifies the server file that its value has been changed. 
-
-Input objects are stored in a list and are therefore referred to in the server file as `input$inputID`. 
-
-Choices for inputs can be named using a list to match the display name to the value
-# Male = "M", Female = "F", Both = "M" & "F"
-
-Selectize input useful for long drop down lists
-
-```{r}
-# plots <- read.csv("../Data/plots.csv", stringsAsFactors = FALSE)
-# species <- read.csv("../Data/species.csv", stringsAsFactors = FALSE)
-# surveys <- read.csv("../Data/surveys.csv", na.strings = "", stringsAsFactors = FALSE)
-# 
-# # input object to select the taxa with radio buttons or check boxes
-# # use input to filter data and create a plot
-# # plot how many total of that taxa in each year
-# 
-# bird_species <- filter(species, taxa == "Bird")$species_id #Bird is input$pick_taxa
-# surveys_birds <- filter(surveys, species_id %in% bird_species)
-# barplot(table(surveys_birds$year))
+fluidPage(
+  
+  titlePanel("Hello Shiny!")
+  
+)
 ```
 
-Exercise: add an input feature to choose males, females, or both
-hint: use either radio buttons or checkboxGroup input
+```{r, eval = FALSE}
+# server.R
+
+# Read in data
+plots <- read.csv("Data/plots.csv", stringsAsFactors = FALSE)
+species <- read.csv("Data/species.csv", stringsAsFactors = FALSE)
+surveys <- read.csv("Data/surveys.csv", na.strings = "", stringsAsFactors = FALSE)
+ 
+function(input, output){
+  
+}
+```
+
+## Input objects
+
+The user interface and the server file interact with each other through `*Input()` and `*Output()` functions. The information in the server file is the recipe for how to construct objects in the ui. 
+
+Input objects collect information from the user and saves them in a list. Input values change whenever a user changes the input. The first two arguments for each input widget are `inputId =` which gives a name to the input object, and `label =` which is displayed to the user. Other arguments depend on the type of input widget. Input objects are stored in a list and are therefore referred to in the server file as `input$inputID`. A gallery of input widgets can be found on the RStudio website [here](http://shiny.rstudio.com/gallery/widget-gallery.html).
+
+We will add an input object to select one of the four taxa in the portals data set. Use the `selectInput()` function to create an input object called `pick_taxa` in the ui file. Use the `choices = ` argument to define a vector with the options. 
+
+```{r, eval = FALSE}
+# ui.R
+
+fluidPage(
+  
+  titlePanel("Hello Shiny!"),
+
+  selectInput("pick_taxa", label = "Pick a taxa", choices = unique(species$taxa))  
+
+)
+```
+
+
+Input objects are **reactive** which means that an update to this value by a user notifies the server file that its value has been changed.
+
+Choices for inputs can be named using a list to match the display name to the value such as `list("Male" = "M", "Female" = "F")`. [Selectize](http://shiny.rstudio.com/gallery/selectize-vs-select.html) inputs are a useful option for long drop down lists. Always be aware of what the default value is for input objects you create.
+
 
 ## Output objects
 
-Output objects are created through the combination of pairs of `render*()` and `*Output()` functions. Define a list of output objects in the server file using render functions:
+Output objects are created through the combination of pairs of `render*()` and `*Output()` functions. The server fil defines a list of output objects in the server file using render functions such as:
 
-```{r}
-# output$my_plot <- renderPlot({})
+```{r, eval = FALSE}
+output$my_plot <- renderPlot({})
 ```
 
-Render functions build an object to display. The code inside the body of the render function will run whenever a reactive value inside the code changes.
+Render functions tell Shiny **how to** build an object to display in the user interface. The outputs of render functions are called *observers* because they observe all upstream reactive values for changes. Use curly brackets inside parenthesis if there are input objects being used. The code inside the body of the render function will run whenever a reactive value inside the code changes. Use the outputId name to refer to that output element in the user interface file to place it in the app. 
 
-Use the output ID to refer to that output element in the user interface file to place it in the app. 
-
-```{r}
-# ui.R
-# fluidPage(
-#   plotOutput("my_plot")
-#   )
+```{r, eval = FALSE}
+ui.R
+fluidPage(
+  plotOutput("my_plot")
+  )
 ```
 
 
-| render | output | description |
+| render function | output function | displays |
 |--------|--------|-------------|
 | renderPlot() | plotOutput() | plots |
 | renderPrint() | verbatimTextOutput() | text |
@@ -107,45 +126,181 @@ Use the output ID to refer to that output element in the user interface file to 
 | renderDataTable() | dataTableOutput() | interactive table |
 | renderUI() | uiOutput() | reactive input object |
 
-Note that you can change the size of plot outputs by defining the number of pixels
+Use the `renderPlot()` function to define a plot showing the total number of observations per year of the taxa selected by the user.
 
-## Reactive objects
+```{r, eval = FALSE}
+  output$taxa_plot <- renderPlot({
+    taxa_subset <- filter(species, taxa == input$pick_taxa)$species_id
+    surveys_subset <- filter(surveys, species_id %in% taxa_subset)
+    barplot(table(surveys_subset$year))
+  })
+```
 
-Input objects that are used in multiple render functions to create different output objects can be created independently as **reactive** objects. This value is then cached to reduce computation required, since only the code to create this object is re-run when input values are updated. Use the function `reactive()` to create reactive objects and use them with function syntax, i.e. with `()`. 
+Use the corresponding `plotOutput()` function in the ui file to display the plot. Make sure the name of the plot output object is in quotes and that ui elements are separated by commas. 
 
-make the filtered data set a reactive object to use in the plot and in another place
+```{r, eval = FALSE}
+plotOutput("taxa_plot")
+```
 
+Note that you can change the size of plot outputs by defining the number of pixels.
+
+### Exercise
+
+Exercise: Add an input widget to control the survey months included in the plot.
+
+```{r, eval = FALSE}
+# in ui.R
+sliderInput("pick_months", "Select which months to include", min = 1, max = 12, value = c(1,12)),
+plotOutput("taxa_plot_2")
+
+# in server.R
+output$taxa_plot_2 <- renderPlot({
+  taxa_subset <- filter(species, taxa == input$pick_taxa)$species_id
+  surveys_subset <- filter(surveys, species_id %in% taxa_subset & month %in% input$pick_months[1]:input$pick_months[2])
+  barplot(table(surveys_subset$year))
+  })
+
+```
 ## Design layout
 
-Page
-Layout or rows
-Panels, objects, or columns
-Elements
+Within the user interface, you can arrange where elements appear by defining a page layout. The `fluidPage()` consists of rows which contain columns of elements. Define the width relative to a 12-unit grid of each element within each column using the function `fluidRow()` and listing columns in units of 12. For each column first define its width. The argument `offset = ` can be used to add extra spacing. Notice how the elements shift when the browser window is re-sized. 
 
-The user interface file or object is where the page layout is defined. One option for the main function is `fluidPage()` and it takes arguments that are layout functions. Organize elements within defined layouts such as `fluidRow()`, `flowLayout()`, `sidebarLayout()`, `splitLayout()`, or `verticalLayout()`. 
 
-Elements can be layered on top of each other using `tabsetPanel()`, `navlistPanel()`, or `navbarPage()`. 
+```{r, eval = FALSE}
+# ui.R
 
-Input and output objects in the user interface file must be separated by commas. 
+fluidPage(
+  fluidRow(
+    column(4,
+           "4"
+    ),
+    column(4, offset = 4,
+           "4 offset 4"
+    )      
+  ),
+  fluidRow(
+    column(3, offset = 3,
+           "3 offset 3"
+    ),
+    column(3, offset = 3,
+           "3 offset 3"
+    )  
+  ))
 
-change layout so there are 2 plots displayed together
-add a tab with the data in a data table
+```
 
+
+You can organize elements using higher level pre-defined layouts such as  `sidebarLayout()`, `splitLayout()`, or `verticalLayout()`. Elements can be layered on top of each other using `tabsetPanel()`, `navlistPanel()`, or `navbarPage()`. 
+
+Organize your application using the [sidebar layout](http://shiny.rstudio.com/reference/shiny/latest/sidebarLayout.html). Place the input widgets in the sidebar and the plot in the main panel. *Think about where you need to put commas and parentheses!*
+
+```{r, eval = FALSE}
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("pick_taxa", label = "Pick a taxa", choices = unique(species$taxa)),
+      sliderInput("pick_months", "Select which months to include", min = 1, max = 12, value = c(1,12))
+      ),
+    mainPanel(
+      # plotOutput("taxa_plot"),
+      plotOutput("taxa_plot_2")
+    )
+  )
+```
+
+Use the argument `position = "right"` in the `sidebarLayout()` function if you prefer to have the side panel appear on the right. 
+
+Make the main panel a [tabset panel](http://shiny.rstudio.com/articles/tabsets.html) with a first tab titled "Plot" and a second titled "Data" which displays all of the survey data used in the plot as a data table ouput. Use the `tabsetPanel()` function with a list of tabs created with `tabPanel()`. Make sure to account for all of your parentheses!
+
+```{r, eval = FALSE}
+
+# in server
+  output$surveys_subset <- renderDataTable({
+    taxa_subset <- filter(species, taxa == input$pick_taxa)$species_id
+    surveys_subset <- filter(surveys, species_id %in% taxa_subset & month %in% input$pick_months[1]:input$pick_months[2])
+    return(surveys_subset)
+  })
+
+# in ui
+mainPanel(
+      tabsetPanel(
+        tabPanel("Plot",
+                plotOutput("taxa_plot_2")),
+        tabPanel("Data", 
+                dataTableOutput("surveys_subset"))
+      )
+    )
+
+```
+
+In addition to titles for tabs, you can also use fun [icons](http://shiny.rstudio.com/reference/shiny/latest/icon.html). 
 
 ### Customize appearance
 
+Along with widgets and output objects, you can add headers, text, images, links, and other html objects to the user interface. There are shiny function equivalents for many common html tags such as `h1()` through `h6()` for headers. You can use the console command line to see that the return from these functions produce HTML code.
+
+Add a bold level 3 header above the plot in the main panel that includes the input object `pick_taxa`. Hint: render a text object in the server file. 
+
+```{r, eval = FALSE}
+# in server
+  output$title_text <- renderText({
+    paste0("Total number of ", input$pick_taxa, "s observed by year in months ", input$pick_months[1], " through ", input$pick_months[2])
+  })
+
+# in ui
+h3(strong(textOutput("title_text")))
+
+```
+
+See [here](http://shiny.rstudio.com/articles/tag-glossary.html) for additional html tags you can use.
+
+For large blocks of text consider saving the text in a separate markdown, html, or text file and use an `include` function ([example](http://shiny.rstudio.com/gallery/including-html-text-and-markdown-files.html)). 
+
 Add images by saving those files in a folder called **www**. Link to it with img(src="<file name>")
 
-Use html wrapper functions to add headers and formatted text
+Bonus Exercise: Below the graph, add text that says what year had the maximum number of the selected taxa recorded. 
 
-Add text that is a title for the graph with the appropriate selected taxa in it
-Exercise: Below the graph, add text that says what year had the maximum number of that taxa recorded
+```{r, eval = FALSE}
+  output$max_year_text <- renderText({
+    max_year <- names(tail(sort(table(surveys_subset()$year)),1))
+    paste0("The most ", input$pick_taxa, "s were recorded in ",max_year)
+  })
+```
 
-Include markdown files
+## Reactive objects
+
+Input objects that are used in multiple render functions to create different output objects can be created independently as **reactive** objects. This value is then cached to reduce computation required, since only the code to create this object is re-run when input values are updated. Use the function `reactive()` to create reactive objects and use them with function syntax, i.e. with `()`. Reactive objects are not output objects so do not use `output$` in front of their name. 
+
+We will make the filtered data set a reactive object called `surveys_subset` to use to render both the plot and the data table, instead of repeating the code to create the filtered data set. Creating this object needs to happen in the server file preceeding its use. 
+
+```{r, eval = FALSE}
+# in server
+  surveys_subset <- reactive({
+    taxa_subset <- filter(species, taxa == input$pick_taxa)$species_id
+    # taxa_subset <- subset(species, taxa == input$pick_taxa, select = species_id) # if dplyr not loaded
+    surveys_subset <- filter(surveys, species_id %in% taxa_subset)
+    return(surveys_subset)
+  })
+
+```
+
+To use `surveys_subset` in render functions, refer to it with function syntax. 
+
+```{r, eval = FALSE}
+# in server
+  output$taxa_plot <- renderPlot({
+    barplot(table(surveys_subset()$year))
+  })
+
+  output$surveys_subset <- renderDataTable({
+    surveys_subset()
+  })
+
+```
+
 
 ## Upload or download files
 
-add a button to download a csv of the data or an image of the graph
+Add a button to download a csv of the data or an image of the graph
 
 ## Deploy your app
 
@@ -156,6 +311,16 @@ There are many ways to extend the functionality and sophistication of Shiny apps
 
 Leaflet
 
+Interactive graphics
+
 Plot.ly
 
+## Helpful tips
+
+* Use a `dependencies.R` or "helpers" file to load packages and data when deploying app outside of local environment
+* input$value or similar cannot be a column name for ggplot object
+
 ## Additional references
+
+* [Principles of Reactivity](https://cdn.rawgit.com/rstudio/reactivity-tutorial/master/slides.html#/) by Joe Cheng
+* 
