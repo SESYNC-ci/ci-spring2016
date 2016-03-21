@@ -1,37 +1,36 @@
 # server.R
+# Read in data
+plots <- read.csv("Data/plots.csv", stringsAsFactors = FALSE)
+species <- read.csv("Data/species.csv", stringsAsFactors = FALSE)
+surveys <- read.csv("Data/surveys.csv", na.strings = "", stringsAsFactors = FALSE)
 
 function(input, output){
   
-  output$hist <- renderPlot({
-    hist(rnorm(input$n))
+  surveys_subset <- reactive({
+    taxa_subset <- filter(species, taxa == input$pick_taxa)$species_id
+    # taxa_subset <- subset(species, taxa == input$pick_taxa, select = species_id) # if dplyr not loaded
+    surveys_subset <- filter(surveys, species_id %in% taxa_subset & month %in% input$pick_months[1]:input$pick_months[2])
+    return(surveys_subset)
+  })
+  
+  output$taxa_plot <- renderPlot({
+    barplot(table(surveys_subset()$year))
+  })
+
+  output$title_text <- renderText({
+    paste0("Total number of ", input$pick_taxa, "s observed by year in months ", input$pick_months[1], " through ", input$pick_months[2])
+  })
+  
+  output$max_year_text <- renderText({
+    max_year <- names(tail(sort(table(surveys_subset()$year)),1))
+    paste0("The most ", input$pick_taxa, "s were recorded in ",max_year)
+  })
+  
+  output$surveys_subset <- renderDataTable({
+    surveys_subset()
   })
   
 }
-# 
-# plots <- read.csv("../Data/plots.csv", stringsAsFactors = FALSE)
-# species <- read.csv("../Data/species.csv", stringsAsFactors = FALSE)
-# surveys <- read.csv("../Data/surveys.csv", na.strings = "", stringsAsFactors = FALSE)
-# 
-# # shiny app:
-# 
-# # input object to select the taxa with radio buttons or check boxes
-# # use input to filter data and create a plot
-# # plot how many total of that taxa in each year
-# 
-# bird_species <- filter(species, taxa == "Bird")$species_id #Bird is input$pick_taxa
-# surveys_birds <- filter(surveys, species_id %in% bird_species)
-# barplot(table(surveys_birds$year))
-# 
-# # Exercise: add an input feature to choose males, females, or both
-# # hint: use either radio buttons or checkboxGroup input
-# 
-# # change layout so there are 2 plots displayed together
-# 
-# # make the filtered data set a reactive object to use in the plot and in another place
-# 
-# # add a tab with the data in a data table
-# 
-# # Add text that is a title for the graph with the appropriate selected taxa in it
-# # Exercise: Below the graph, add text that says what year had the maximum number of that taxa recorded
-# 
+
+
 # # add a button to download a csv of the data or an image of the graph
