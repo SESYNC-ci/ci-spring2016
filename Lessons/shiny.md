@@ -1,8 +1,8 @@
 -   [Interactive web applications in R](#interactive-web-applications-in-r)
     -   [File structure](#file-structure)
-    -   [Input objects](#input-objects)
-    -   [Output objects](#output-objects)
-        -   [Exercise](#exercise)
+    -   [Input and Output Objects](#input-and-output-objects)
+        -   [Input Objects](#input-objects)
+        -   [Output objects](#output-objects)
     -   [Design layout](#design-layout)
         -   [Customize appearance](#customize-appearance)
     -   [Reactive objects](#reactive-objects)
@@ -31,9 +31,25 @@ There are two ways to structure the files for an app:
 
 1.  Create one file called `app.R`. In this file, define objects `ui` and `server` with the assignment operator `<-` and then pass them to the function `shinyApp()`.
 
-> `ui <- fluidPage()` `server <- function(input, output){}` `shinyApp(ui = ui, server = server)`
+``` r
+ui <- fluidPage() 
+
+server <- function(input, output){}
+
+shinyApp(ui = ui, server = server)
+```
 
 1.  Split the template into two files named `ui.R` and `server.R` and save these files in the same folder.
+
+``` r
+# ui.R
+fluidPage() 
+```
+
+``` r
+# server.R
+function(input, output){}
+```
 
 We will use the second option here to make an app. When the `shiny` package is installed and loaded, RStudio will identify this file structure and create a green arrow with a "Run App" button when you open a file in the app. Applications use your current R session and are displayed in a separate browser window or the RStudio Viewer pane.
 
@@ -45,7 +61,7 @@ runExample("01_hello")
 
 You may need to prevent your broswer from blocking the pop-out window. Notice the stop sign that appears in the Console window while your app is running. This is because it is using the current R session. Closing the app window does not stop the app from using your R session. *Make sure to end the app when you are finished by clicking the stop sign.*
 
-Now we will begin to make a new app. Create a new folder in your current working directory with ui and server files, and then copy the data folder into the app folder. In the ui file, create a title for your app and in the server file, read in the 3 csv files.
+> Create a new folder in your current working directory with ui and server files, and then copy the data folder into the app folder. In the ui file, create a title for your app and in the server file, read in the 3 csv files.
 
 ``` r
 # ui.R
@@ -70,14 +86,16 @@ function(input, output){
 }
 ```
 
-Input objects
--------------
+Input and Output Objects
+------------------------
 
-The user interface and the server file interact with each other through **input** and **output** objects. The information in the server file is the recipe for how to construct objects in the ui.
+The user interface and the server file interact with each other through **input** and **output** objects. The information in the server file is the recipe for how to construct input and objects in the ui, and the user's interaction with input objects alters output objects based on the code in the server file. Having your app function as you intend requires careful attention to how your input and output objects relate to each other, i.e. what actions will initiate what sections of code to run at what time.
 
-Input objects collect information from the user and saves them in a list. Input values change whenever a user changes the input. The first two arguments for each input widget are `inputId =` which gives a name to the input object, and `label =` which is displayed to the user. Other arguments depend on the type of input widget. Input objects are stored in a list and are therefore referred to in the server file as `input$inputID`. A gallery of input widgets can be found on the RStudio website [here](http://shiny.rstudio.com/gallery/widget-gallery.html).
+### Input Objects
 
-We will add an input object to select one of the four taxa in the portals data set. Use the `selectInput()` function to create an input object called `pick_taxa` in the ui file. Use the `choices =` argument to define a vector with the options.
+Input objects collect information from the user and saves them in a list. Input values change whenever a user changes the input. The first two arguments for each input widget are `inputId =` which gives a name to the input object, and `label =` which is displayed to the user. Other arguments depend on the type of input widget. Input objects are stored in a list and are therefore referred to in the server file with the syntax `input$inputID`. A gallery of input widgets can be found on the RStudio website [here](http://shiny.rstudio.com/gallery/widget-gallery.html).
+
+> Create an input object in the ui to allow users to select one of the four taxa in the portals data set. Use the `selectInput()` function to create an input object called `pick_taxa` in the ui file. Use the `choices =` argument to define a vector with the options.
 
 ``` r
 # ui.R
@@ -93,18 +111,19 @@ fluidPage(
 
 Input objects are **reactive** which means that an update to this value by a user notifies the server file that its value has been changed.
 
-Choices for inputs can be named using a list to match the display name to the value such as `list("Male" = "M", "Female" = "F")`. [Selectize](http://shiny.rstudio.com/gallery/selectize-vs-select.html) inputs are a useful option for long drop down lists. Always be aware of what the default value is for input objects you create.
+**Some other notes on input objects** \* Choices for inputs can be named using a list to match the display name to the value such as `list("Male" = "M", "Female" = "F")`. \* [Selectize](http://shiny.rstudio.com/gallery/selectize-vs-select.html) inputs are a useful option for long drop down lists. \* Always be aware of what the default value is for input objects you create.
 
-Output objects
---------------
+### Output objects
 
-Output objects are created through the combination of pairs of `render*()` and `*Output()` functions. The server fil defines a list of output objects in the server file using render functions such as:
+Output objects are created through the combination of pairs of `render*()` and `*Output()` functions. The server file defines a list of output objects using render functions with the syntax:
 
 ``` r
-output$my_plot <- renderPlot({})
+output$plot1 <- renderPlot({})
+output$dataframe1 <- renderTable({})
+output$message1 <- renderText({})
 ```
 
-Render functions tell Shiny **how to** build an object to display in the user interface. The outputs of render functions are called *observers* because they observe all upstream reactive values for changes. Use curly brackets inside parenthesis if there are input objects being used. The code inside the body of the render function will run whenever a reactive value inside the code changes. Use the outputId name to refer to that output element in the user interface file to place it in the app.
+Render functions tell Shiny **how to** build an output object to display in the user interface. Output objects can be data frames, plots, images, text, or most anything you can create with R code to be visualized. The outputs of render functions are called *observers* because they observe all upstream reactive values for changes. The code inside the body of the render function will run whenever a reactive value inside the code changes, such as when an input object's value is changed within the user interface. Use outputId names in quotes to refer to output objects within `*Output()` functions. Other arguments to `*Output()` functions can control their size in the ui as well as [advanced interactions for plots](http://shiny.rstudio.com/articles/plot-interaction.html)
 
 ``` r
 ui.R
@@ -113,14 +132,15 @@ fluidPage(
   )
 ```
 
-| render function   | output function      | displays              |
-|-------------------|----------------------|-----------------------|
-| renderPlot()      | plotOutput()         | plots                 |
-| renderPrint()     | verbatimTextOutput() | text                  |
-| renderText()      | textOutput()         | text                  |
-| renderTable()     | tableOutput()        | static table          |
-| renderDataTable() | dataTableOutput()    | interactive table     |
-| renderUI()        | uiOutput()           | reactive input object |
+| render function   | output function      | displays          |
+|-------------------|----------------------|-------------------|
+| renderPlot()      | plotOutput()         | plots             |
+| renderPrint()     | verbatimTextOutput() | text              |
+| renderText()      | textOutput()         | text              |
+| renderTable()     | tableOutput()        | static table      |
+| renderDataTable() | dataTableOutput()    | interactive table |
+
+It is also possible to render reactive *input* objects using the `renderUI()` and `uiOutput()` functions, however we will not cover them in this lesson.
 
 Use the `renderPlot()` function to define a plot showing the total number of observations per year of the taxa selected by the user.
 
@@ -138,11 +158,7 @@ Use the corresponding `plotOutput()` function in the ui file to display the plot
 plotOutput("taxa_plot")
 ```
 
-Note that you can change the size of plot outputs by defining the number of pixels.
-
-### Exercise
-
-Exercise: Add an input widget to control the survey months included in the plot.
+> Exercise: Add an input widget to control the survey months included in the plot.
 
 ``` r
 # in ui.R
@@ -224,7 +240,9 @@ mainPanel(
     )
 ```
 
-In addition to titles for tabs, you can also use fun [icons](http://shiny.rstudio.com/reference/shiny/latest/icon.html).
+**Some other notes on ui layout**
+
+-   In addition to titles for tabs, you can also use fun [icons](http://shiny.rstudio.com/reference/shiny/latest/icon.html).
 
 ### Customize appearance
 
@@ -248,7 +266,7 @@ For large blocks of text consider saving the text in a separate markdown, html, 
 
 Add images by saving those files in a folder called **www**. Link to it with img(src="<file name>")
 
-Bonus Exercise: Below the graph, add text that says what year had the maximum number of the selected taxa recorded.
+> Exercise: Below the graph, add text that says what year had the maximum number of the selected taxa recorded. Compare the appearance of `renderText()` and `textOutput()` with `renderPrint()` and `verbatimTextOutput()`.
 
 ``` r
   output$max_year_text <- renderText({
@@ -318,3 +336,5 @@ Additional references
 -   [Shiny tutorial by RStudio](http://shiny.rstudio.com/tutorial/)
 -   [Principles of Reactivity](https://cdn.rawgit.com/rstudio/reactivity-tutorial/master/slides.html#/) by Joe Cheng
 -   [NEON Shiny tutorial](http://neondataskills.org/R/Create-Basic-Shiny-App-In-R/)
+-   [Input widget gallery](http://shiny.rstudio.com/gallery/widget-gallery.html)
+-   [Advanced interactions for plots](https://gallery.shinyapps.io/095-plot-interaction-advanced/)
