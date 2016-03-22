@@ -1,46 +1,51 @@
+-   [Interactive web applications in R](#interactive-web-applications-in-r)
+    -   [File structure](#file-structure)
+    -   [Input objects](#input-objects)
+    -   [Output objects](#output-objects)
+        -   [Exercise](#exercise)
+    -   [Design layout](#design-layout)
+        -   [Customize appearance](#customize-appearance)
+    -   [Reactive objects](#reactive-objects)
+    -   [Upload or download files](#upload-or-download-files)
+    -   [Deploy your app](#deploy-your-app)
+    -   [Shiny extensions](#shiny-extensions)
+    -   [Helpful tips](#helpful-tips)
+    -   [Additional references](#additional-references)
+
 Interactive web applications in R
 =================================
 
-This lesson presents an introduction to creating interactive web applications using the Shiny package in R. We will cover the following concepts:
+This lesson presents an introduction to creating interactive web applications using the [Shiny](https://cran.r-project.org/web/packages/shiny/index.html) package in R. We will learn about the basic building blocks of a Shiny app, how to create interactive elements, customize them, and arrange them on a page by building an app to interact with parts of the [Portals teaching database](https://github.com/weecology/portal-teachingdb). This lesson builds on concepts covered in the [data manipulation lesson](https://github.com/SESYNC-ci/ci-spring2016/blob/master/Lessons/tidyr_dplyr.md) and requires the `shiny` and `dplyr` libraries.
 
--   [file structure template](#app-template)
--   [input objects](#input-objects)
--   [output objects](#output-objects)
--   [create a reactive object](#create-reactive-object)
--   [customizing layout design](#design-layout)
--   [upload or download files](#download-button)
--   [deploying your app](#how-to-deploy)
+File structure
+--------------
 
-Make sure the shiny package is installed and loaded
+Shiny was developed by RStudio with the intention of making plots more dynamic and interactive. It can be used for exploratory data analysis and visualization, to facilitate remote collaboration, share results, and [much more](http://shiny.rstudio.com/gallery/). Depending on the purpose and computing requirements of any Shiny app, it may live on your computer, a remote server, or in the cloud. However all Shiny apps consists of the same two main components:
 
-``` r
-# library(shiny)
-```
+-   The **user interface** which defines what users will see in the app and its design.
+-   The **server** which defines the instructions for how to assemble all components of the app.
 
-App template
-------------
+The appearance of the web page, or user interface, is controlled by the computer running a live R session. Users can manipulate elements within the user interface that will trigger R code to run, in turn updating the UI display.
 
-A shiny app consists of two components:
-
--   **user interface** which defines what users will see in the app
--   **server** which defines the instructions for assembling components of the app as a function of input and output objects
-
-There are two ways to structure an app:
+There are two ways to structure the files for an app:
 
 1.  Create one file called `app.R`. In this file, define objects `ui` and `server` with the assignment operator `<-` and then pass them to the function `shinyApp()`.
-2.  Split the template into two files named `ui.R` and `server.R`.
 
-We will use the second option here to make an app. When the `shiny` package is installed and loaded, RStudio will identify this file structure and create a green arrow with a "Run App" button when you open a file in the app. Applications use your current R session and are displayed in a browser window.
+> `ui <- fluidPage()` `server <- function(input, output){}` `shinyApp(ui = ui, server = server)`
 
-Test this by looking at an example within the shiny package:
+1.  Split the template into two files named `ui.R` and `server.R` and save these files in the same folder.
+
+We will use the second option here to make an app. When the `shiny` package is installed and loaded, RStudio will identify this file structure and create a green arrow with a "Run App" button when you open a file in the app. Applications use your current R session and are displayed in a separate browser window or the RStudio Viewer pane.
+
+See how this works by running one of the [built-in examples](http://shiny.rstudio.com/tutorial/lesson1/#Go%20Further) within the shiny package:
 
 ``` r
 runExample("01_hello")
 ```
 
-Notice the stop sign that appears in the Console window while your app is running. This is because it is using the current R session. Make sure to end the app by either closing the external window or clicking the stop sign.
+You may need to prevent your broswer from blocking the pop-out window. Notice the stop sign that appears in the Console window while your app is running. This is because it is using the current R session. Closing the app window does not stop the app from using your R session. *Make sure to end the app when you are finished by clicking the stop sign.*
 
-Create a new folder in your current working directory with ui and server files, and a copy of the data folder. Read in the data in the server file and display a title in the user interface file
+Now we will begin to make a new app. Create a new folder in your current working directory with ui and server files, and then copy the data folder into the app folder. In the ui file, create a title for your app and in the server file, read in the 3 csv files.
 
 ``` r
 # ui.R
@@ -68,9 +73,9 @@ function(input, output){
 Input objects
 -------------
 
-The user interface and the server file interact with each other through \*\*\_\_Input()\*\* and \*\*\_\_Output()\*\* functions.
+The user interface and the server file interact with each other through **input** and **output** objects. The information in the server file is the recipe for how to construct objects in the ui.
 
-Input objects collect information from the user and saves them in a list. The first two arguments for each input widget are `inputId =` which gives a name to the input object, and `label =` which is displayed to the user. Other arguments depend on the type of input widget. Input objects are stored in a list and are therefore referred to in the server file as `input$inputID`. A gallery of input widgets can be found on the RStudio website [here](http://shiny.rstudio.com/gallery/widget-gallery.html).
+Input objects collect information from the user and saves them in a list. Input values change whenever a user changes the input. The first two arguments for each input widget are `inputId =` which gives a name to the input object, and `label =` which is displayed to the user. Other arguments depend on the type of input widget. Input objects are stored in a list and are therefore referred to in the server file as `input$inputID`. A gallery of input widgets can be found on the RStudio website [here](http://shiny.rstudio.com/gallery/widget-gallery.html).
 
 We will add an input object to select one of the four taxa in the portals data set. Use the `selectInput()` function to create an input object called `pick_taxa` in the ui file. Use the `choices =` argument to define a vector with the options.
 
@@ -93,13 +98,13 @@ Choices for inputs can be named using a list to match the display name to the va
 Output objects
 --------------
 
-Output objects are created through the combination of pairs of `render*()` and `*Output()` functions. Define a list of output objects in the server file using render functions:
+Output objects are created through the combination of pairs of `render*()` and `*Output()` functions. The server fil defines a list of output objects in the server file using render functions such as:
 
 ``` r
 output$my_plot <- renderPlot({})
 ```
 
-Render functions build an object to display in the server file. Use curly brackets inside parenthesis if there are input objects being used. The code inside the body of the render function will run whenever a reactive value inside the code changes. Use the output ID to refer to that output element in the user interface file to place it in the app.
+Render functions tell Shiny **how to** build an object to display in the user interface. The outputs of render functions are called *observers* because they observe all upstream reactive values for changes. Use curly brackets inside parenthesis if there are input objects being used. The code inside the body of the render function will run whenever a reactive value inside the code changes. Use the outputId name to refer to that output element in the user interface file to place it in the app.
 
 ``` r
 ui.R
@@ -301,5 +306,15 @@ Interactive graphics
 
 Plot.ly
 
+Helpful tips
+------------
+
+-   Use a `dependencies.R` or "helpers" file to load packages and data when deploying app outside of local environment
+-   input$value or similar cannot be a column name for ggplot object
+
 Additional references
 ---------------------
+
+-   [Shiny tutorial by RStudio](http://shiny.rstudio.com/tutorial/)
+-   [Principles of Reactivity](https://cdn.rawgit.com/rstudio/reactivity-tutorial/master/slides.html#/) by Joe Cheng
+-   [NEON Shiny tutorial](http://neondataskills.org/R/Create-Basic-Shiny-App-In-R/)
