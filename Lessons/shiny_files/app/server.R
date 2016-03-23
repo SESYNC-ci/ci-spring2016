@@ -26,9 +26,31 @@ function(input, output){
     paste0("The most ", input$pick_taxa, "s were recorded in ",max_year)
   })
   
-  output$surveys_subset <- renderDataTable({
+  output$max_year_text_print <- renderPrint({
+    max_year <- names(tail(sort(table(surveys_subset()$year)),1))
+    paste0("The most ", input$pick_taxa, "s were recorded in ",max_year)
+  })
+  
+  output$surveys_data <- renderDataTable({
     surveys_subset()
   })
+  
+  # output$download_data <- downloadHandler(
+  #   filename = "portals_subset.csv",
+  #   content = function(file) {
+  #     write.csv(surveys_subset(), file)
+  #   }
+  # )
+  
+  output$download_data <- downloadHandler(
+    filename = function() { 
+      paste("portals_", input$pick_taxa, ".csv", sep="") 
+    },
+    content = function(file) {
+      write.csv(datasetInput(), file)
+    }
+  )
+  
   
 }
 
