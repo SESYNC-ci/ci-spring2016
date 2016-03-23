@@ -1,8 +1,12 @@
 # server.R
+library(dplyr)
+library(shiny)
 # Read in data
 plots <- read.csv("Data/plots.csv", stringsAsFactors = FALSE)
 species <- read.csv("Data/species.csv", stringsAsFactors = FALSE)
 surveys <- read.csv("Data/surveys.csv", na.strings = "", stringsAsFactors = FALSE)
+huc_md <- readRDS("/nfs/public-data/ci-spring2016/Geodata/huc_md.RData")
+
 
 function(input, output){
   
@@ -16,7 +20,7 @@ function(input, output){
   output$taxa_plot <- renderPlot({
     barplot(table(surveys_subset()$year))
   })
-
+  
   output$title_text <- renderText({
     paste0("Total number of ", input$pick_taxa, "s observed by year in months ", input$pick_months[1], " through ", input$pick_months[2])
   })
@@ -47,12 +51,17 @@ function(input, output){
       paste("portals_", input$pick_taxa, ".csv", sep="") 
     },
     content = function(file) {
-      write.csv(datasetInput(), file)
+      write.csv(surveys_subset(), file)
     }
   )
   
-  
+  output$sesync_map <- renderLeaflet({
+    leaflet(counties_md) %>% 
+      setView(lng = -76.505206, lat = 38.9767231, zoom = 14) %>%
+      addProviderTiles("Esri.WorldImagery") %>%
+      addMarkers(lng = -76.505206, lat = 38.9767231, popup = "SESYNC") %>%
+      addPolygons(fill = FALSE)   %>%
+      addRasterImage(mask(nlcd, nlcd == 41, maskvalue = FALSE), opacity = 0.5)
+  })
+
 }
-
-
-# # add a button to download a csv of the data or an image of the graph
