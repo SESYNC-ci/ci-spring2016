@@ -238,21 +238,9 @@ mainPanel(
 Along with widgets and output objects, you can add headers, text, images, links, and other html objects to the user interface. There are shiny function equivalents for many common html tags such as `h1()` through `h6()` for headers. You can use the console command line to see that the return from these functions produce HTML code.
 
 ``` r
-library(shiny)
 h1("This is html")
-```
-
-<!--html_preserve-->
-<h1>
-This is html
-</h1>
-<!--/html_preserve-->
-``` r
 a(href="www.sesync.org", "This is a link")
 ```
-
-<!--html_preserve-->
-<a href="www.sesync.org">This is a link</a><!--/html_preserve-->
 
 > Add a bold level 3 header above the plot in the main panel that includes the name of the selected taxa.
 
@@ -264,6 +252,19 @@ a(href="www.sesync.org", "This is a link")
 
 # in ui
 h3(strong(textOutput("plot_title")))
+```
+
+> Change the overall page layout from `fluidPage()` to `navbarPage()`. Move the app title from a panel to the first argument of `navbarPage()` and wrap the `sidebarLayout()` in a tabPanel called portals. Remove the title panel.
+
+``` r
+# ui
+navbarPage("csi app",
+  tabPanel("portals",
+  sidebarLayout(
+    sidebarPanel( ... ), # code truncated
+    mainPanel( ... ))    # code truncated
+  )
+)
 ```
 
 > Exercise: Below the graph, add text that says what year had the maximum number of the selected taxa recorded. Compare the appearance of `renderText()` and `textOutput()` with `renderPrint()` and `verbatimTextOutput()`.
@@ -368,7 +369,7 @@ Deploy your app
 Shiny extensions
 ----------------
 
-There are many ways to enhance and extend the functionality and sophistication of Shiny apps using existing tools and platforms. Javascript visualizations can be used in RShiny with a framework called **htmlwidgets**, which lets you access powerful features of tools like Leaflet, Plot.ly, and d3 within R. Since these frameworks are bridges to, or wrappers, for the original libraries and packages written in another programming language, deploying them requires becoming familiar with the logic and structure of the output objects being created.
+There are many ways to enhance and extend the functionality and sophistication of Shiny apps using existing tools and platforms. Javascript visualizations can be used in RShiny with a framework called **htmlwidgets**, which lets you access powerful features of tools like Leaflet, Plot.ly, and d3 within R. Since these frameworks are bridges to, or wrappers, for the original libraries and packages that may have been written in another programming language, deploying them requires becoming familiar with the logic and structure of the output objects being created. The [Leaflet package for R](https://rstudio.github.io/leaflet/) is well-integrated with other R packages like Shiny and sp however it is also useful to refer to the more extensive documentation of the [JavaScript library](http://leafletjs.com/reference.html).
 
 ### Leaflet
 
@@ -379,15 +380,62 @@ Just like plots, text, and data frames, ui elements created with htmlwidgets are
 -   [ui.R](https://github.com/rstudio/shiny-examples/blob/master/063-superzip-example/ui.R)
 -   [server.R](https://github.com/rstudio/shiny-examples/blob/master/063-superzip-example/server.R)
 
-Since drawing maps is computationally intensive, interactivity within the map is mostly handed outside of the render function using a function in the server called `leafletProxy()`.
+The code inside the render function describes how to create the leaflet map object based on functions in the leaflet package. It starts with the function `leaflet()` which returns a map object, and then adds to and modifies elements of that object using the pipe operator `%>%`. Elements include background map tiles, markers, polygons, lines, and other geographical features.
 
-> make a map with sesync's location. return a lat/long where users click.
+> Add a new panel to the navbar called "Map" that contains a Leaflet map object with a marker at SESYNC's location. It may take some time for the map to appear.
 
-### Plot.ly
+``` r
+# in server
+  output$sesync_map <- renderLeaflet({
+    leaflet() %>%
+      addTiles() %>%
+      addMarkers(lng = -76.505206, lat = 38.9767231, popup = "SESYNC")
+  })
 
-[plot.ly](https://plot.ly/r/shiny-tutorial/#plotly-graphs-in-shiny)
+# in ui
+navbarPage("CSI App",
+           tabPanel("Portals" ...), # code truncated here
+           tabPanel("Map", leafletOutput("sesync_map"))
+)
+```
 
-> add a new tabpanel to the ui with the same barplot with plot\_ly
+![](shiny_files/map1.png)
+
+Using `addTiles()` displays the default background map tiles. However there are many more options to pick from. There is a list of the free background tiles available and what they look like [here](http://leaflet-extras.github.io/leaflet-providers/preview/index.html) or you can [create your own](http://osm2vectortiles.org/maps/) using data from [OpenStreetMap](http://www.openstreetmap.org/). To use a different background specify which `ProviderTiles` to display.
+
+> Change the background image from the default to Esri World Imagery.
+
+``` r
+# in server
+  output$sesync_map <- renderLeaflet({
+    leaflet() %>%
+      addProviderTiles("Esri.WorldImagery") %>%
+      addMarkers(lng = -76.505206, lat = 38.9767231, popup = "SESYNC")
+  })
+
+# in ui
+tabPanel("Map", leafletOutput("sesync_map"))
+```
+
+![](shiny_files/map2.png)
+
+> Add some more layers to the map to show Maryland counties and overlay the pasture NLCD data.
+
+``` r
+# in server
+  output$sesync_map <- renderLeaflet({
+    leaflet(counties_md) %>% 
+      setView(lng = -76.505206, lat = 38.9767231, zoom = 14) %>%
+      addProviderTiles("Esri.WorldImagery") %>%
+      addMarkers(lng = -76.505206, lat = 38.9767231, popup = "SESYNC") %>%
+      addPolygons(fill = FALSE)   %>%
+      addRasterImage(mask(nlcd, nlcd == 41, maskvalue = FALSE), opacity = 0.5)
+  })
+```
+
+![](shiny_files/map3.png)
+
+Since drawing maps is computationally intensive, interactivity within the map is typically handed outside of the main render function using a function in the server called `leafletProxy()`, and the static map elements are handled within the first render function.
 
 Additional references
 ---------------------
@@ -399,3 +447,6 @@ Additional references
 -   [Input widget gallery](http://shiny.rstudio.com/gallery/widget-gallery.html)
 -   [Advanced interactions for plots](https://gallery.shinyapps.io/095-plot-interaction-advanced/)
 -   [Leaflet](https://rstudio.github.io/leaflet/shiny.html)
+-   [Geospatial libraries for R](http://www.r-bloggers.com/ropensci-geospatial-libraries/)
+-   [Computerworld tutorial Create maps in R in 10 easy steps](http://www.computerworld.com/article/3038270/data-analytics/create-maps-in-r-in-10-fairly-easy-steps.html?page=2)
+-   [plot.ly](https://plot.ly/r/shiny-tutorial/#plotly-graphs-in-shiny)

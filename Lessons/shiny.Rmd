@@ -1,20 +1,11 @@
 ---
 title: "Interactive web applications with RShiny"
 author: "Kelly Hondula"
-# output:
-#   md_document:
-#     toc: true
-#     toc_depth: 2
-#     variant: markdown_github
-output: 
-  html_document:
-    code_folding: hide
+output:
+  md_document:
     toc: true
-    toc_float: true
     toc_depth: 2
-    theme: united
-    highlight: tango
-
+    variant: markdown_github
 ---
   
 # Interactive web applications in R
@@ -416,6 +407,8 @@ navbarPage("CSI App",
 
 ```
 
+![](shiny_files/map1.png)
+
 Using `addTiles()` displays the default background map tiles. However there are many more options to pick from. There is a list of the free background tiles available and what they look like [here](http://leaflet-extras.github.io/leaflet-providers/preview/index.html) or you can [create your own](http://osm2vectortiles.org/maps/) using data from [OpenStreetMap](http://www.openstreetmap.org/). To use a different background specify which `ProviderTiles` to display. 
 
 > Change the background image from the default to Esri World Imagery.
@@ -433,6 +426,8 @@ tabPanel("Map", leafletOutput("sesync_map"))
 
 ```
 
+![](shiny_files/map2.png)
+
 > Add some more layers to the map to show Maryland counties and overlay the pasture NLCD data. 
 
 ```{r, eval = FALSE}
@@ -446,6 +441,8 @@ tabPanel("Map", leafletOutput("sesync_map"))
       addRasterImage(mask(nlcd, nlcd == 41, maskvalue = FALSE), opacity = 0.5)
   })
 ```
+
+![](shiny_files/map3.png)
 
 Since drawing maps is computationally intensive, interactivity within the map is typically handed outside of the main render function using a function in the server called `leafletProxy()`, and the static map elements are handled within the first render function.
 
