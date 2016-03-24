@@ -1,14 +1,14 @@
 ---
-  title: "Introduction to R"
+title: "Introduction to R"
 author: "Kelly Hondula"
-output: 
+output:
   md_document:
-  variant: markdown_github
+    toc: true
+    toc_depth: 2
+    variant: markdown_github
 ---
   
-  # RStudio Basics
-  
-  R is a programming language that we will interact with through RStudio. We are using RStudio server in a browser window in order to connect with other services at SESYNC, but most of what we will cover also applies to the RStudio program that runs as a standalone program on your computer. 
+R is a programming language that we will interact with through RStudio. We are using RStudio server in a browser window in order to connect with other services at SESYNC, but most of what we will cover also applies to the RStudio program that runs as a standalone program on your computer. 
 
 Anatomy of RStudio
 
@@ -71,7 +71,7 @@ __Review__
   There are many ways to get help with R and RStudio, including functionality built into the program. Search using the help tab on the lower right, or use the question mark function. Let's see if there is an easy way to find the mean of a sequence of numbers
 
 
-```{r}
+```{r, eval = FALSE}
 ?mean
 ```
 
@@ -147,13 +147,13 @@ The data we are going to use is in a folder on the sesync storage space that you
 We will use the function `read.csv()` that reads in a file by passing it the location of the file. The general syntax for the functions to read in data are to give the path to the file name, and then supply optinal additional arguments as necessary like specifying column types. If you don't specify what argument you are giving it, R will use the defaults, which we will do for now. 
 
 
-``` r
+``` {r}
 read.csv(file="/nfs/public-data/CSI2015/plots.csv")
 ```
 
 Remember to use the assignment operator "<-" to store that data in memory and work with it
 
-``` r
+``` {r}
 plots <- read.csv(file="/nfs/public-data/CSI2015/plots.csv")
 surveys <- read.csv(file="/nfs/public-data/CSI2015/surveys.csv")
 ``` 
@@ -166,7 +166,7 @@ There are several ways to look at the data
 * navigate in Environment window
 * open csv by clicking on name in file browser (if in current working directory)
 
-``` r
+``` {r}
 head(surveys)
 head(plots)
 ``` 
@@ -178,9 +178,9 @@ Additional Information
   
   Some basic math functions in R
 
-```r
+```{r, eval = FALSE}
 *, +, -, /, ^, %%, %/%
-  abs, sign
+abs, sign
 acos, asin, atan, atan2
 sin, cos, tan
 ceiling, floor, round, trunc, signif
@@ -214,7 +214,7 @@ Some handy functions to get a quick idea of your data:
 | summary | summary info |
 | head | shows beginning rows |
 
-``` r
+``` {r}
 str(plots)
 summary(plots)
 
@@ -239,7 +239,7 @@ Character data (words) in base R is read in as a factor by default, ie. stored a
 
 In surveys table, what is the difference between an NA in the species column vs NA in the wgt column?
 
-``` r
+``` {r}
 head(surveys)
 ``` 
 
@@ -256,7 +256,7 @@ A factor is a vector that can contain only predefined values, and is used to sto
 
 We can make a column a factor with the as.factor() function. Use `as.factor()` to change the month column to a factor and see how the result of the summary function changes
 
-```r
+```{r}
 surveys$month <- as.factor(surveys$month)
 summary(surveys)
 ```
@@ -294,7 +294,7 @@ Lists are different from  vectors because their elements can be of any type, inc
 
 c() will combine several lists into one. If given a combination of atomic vectors and lists, c() will coerce the vectors to lists before combining them. Compare the results of list() and c()
 
-```r
+```{r}
 x <- list(list(1, 2), c(3, 4))
 y <- c(list(1, 2), c(3, 4))
 str(x)
@@ -347,7 +347,7 @@ All subsetting operators can be combined with assignment to modify selected valu
 
 With lists, you can use subsetting + assignment + NULL to remove components from a list. To add a literal NULL to a list, use [ and list(NULL):
 
-```r
+```{r}
 x <- list(a = 1, b = 2)
 x[["b"]] <- NULL
 str(x)
@@ -355,7 +355,7 @@ str(x)
 #> List of 1
 #>  $ a: num 1
 
-```r
+```{r}
 y <- list(a = 1)
 y["b"] <- list(NULL)
 str(y)
@@ -392,7 +392,7 @@ The plot() function is the most basic plotting function. It is polymorphic, ie. 
 
 basic syntax is plot(x, y) or plot(y ~ x)
 
-``` r
+``` {r}
 plot(surveys$month, surveys$wgt)
 plot(surveys$year, surveys$wgt)
 plot(surveys$year, log(surveys$wgt))
@@ -401,7 +401,7 @@ plot(surveys$year, log(surveys$wgt))
 
 ### Histograms
 
-``` r
+``` {r}
 hist(surveys$wgt)
 hist(log(surveys$wgt))
 ``` 
@@ -410,7 +410,7 @@ hist(log(surveys$wgt))
 
 Use a boxplot to compare the number of species seen each year. We'll use another function from the lubridate package, year()
 
-``` r
+``` {r}
 par(mfrow=c(1,1))
 boxplot(surveys$wgt ~ surveys$year)
 boxplot(surveys$wgt ~ surveys$month)
@@ -425,7 +425,7 @@ boxplot(log(surveys$wgt) ~ surveys$year)
 __Mulit-panel plots__
 Multi-panel plots can be made by changing the graphical parameters with the par() function. 
 
-``` r
+``` {r}
 surveys1990 <- subset(surveys, year == 1990)
 surveys1996 <- subset(surveys, year == 1996)
 
@@ -442,7 +442,7 @@ We know that the dates columns are exactly the same for the no_species dataframe
 
 You can save a plot by opening up a "graphics device" and writing the plot to a specified file. The general syntax is:
 
-```{r}
+```{r, eval = FALSE}
 pdf(file="myfile.pdf", width=7, height=6, units="in")
 plot(x, y)
 dev.off()
@@ -471,7 +471,7 @@ Three components of functions
 
 A function needs to have a name, probably at least one argument (although it doesn’t have to), and a body of code that does something. At the end it usually should (although doesn’t have to) return an object out of the function. The important idea behind functions is that objects that are created within the function are local to the environment of the function – they don’t exist outside of the function. But you can “return” the value of the object from the function, meaning pass the value of it into the global environment.
 
-```r
+```{r}
 myfunction <- function(x) {
   # do something to x here
   # return a value of interest
@@ -482,13 +482,13 @@ The base R language does not have a function to calculate the standard error of 
 
 First subset the surveys table to get rid of the values with `NA`. We'll use a handy function called `na.omit()`.
 
-```r
+```{r}
 surveys <- na.omit(surveys)
 ```
 
 The 3 functions needed for the standard error calculation are `sqrt` for square root, `var` for variance, and `length` for sample size. Calculate the standard error of the `wgt` column using these three functions. 
 
-```r
+```{r}
 sqrt(var(surveys$wgt)/length(surveys$wgt))
 ```
 
@@ -500,7 +500,7 @@ When you might want to use a function:
 
 We can generalize the calculation that we made by storing it as a **function** called stderr. The calculation that we made above goes into the **body** of the function. 
 
-```r
+```{r}
 stderr <- function(x){
   # this function returns the standard error of the mean
   sqrt(var(x)/length(x))}
@@ -509,4 +509,8 @@ stderr <- function(x){
 Q: Calculate the standard error of the mean for the subset of surveys done in 1990
 Q: Calculate the standard error of the mean for all surveys done in the month of June
 
+## Additional resources and references
 
+* [Jenny Bryan's Stat 545 class materials index of topics](http://stat545-ubc.github.io/topics.html)
+* [keyboard shortcuts in RStudio](https://support.rstudio.com/hc/en-us/articles/200711853-Keyboard-Shortcuts)
+* [R Graph catalog](http://shiny.stat.ubc.ca/r-graph-catalog/)

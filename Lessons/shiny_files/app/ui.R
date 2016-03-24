@@ -1,6 +1,6 @@
 # ui.R
 
-navbarPage("csi app",
+navbarPage("csi app", theme = shinytheme("journal"),
   tabPanel("portals",
   
   # titlePanel("Hello Shiny!"),

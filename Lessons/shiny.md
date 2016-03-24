@@ -283,6 +283,7 @@ navbarPage("csi app",
 -   See [here](http://shiny.rstudio.com/articles/tag-glossary.html) for additional html tags you can use.
 -   For large blocks of text consider saving the text in a separate markdown, html, or text file and use an `include*` function ([example](http://shiny.rstudio.com/gallery/including-html-text-and-markdown-files.html)).
 -   Add images by saving those files in a folder called **www**. Link to it with `img(src="<file name>")`
+-   Use a shiny theme with the [shinythemes](http://rstudio.github.io/shinythemes/) package
 
 Reactive objects
 ----------------
@@ -369,7 +370,10 @@ Deploy your app
 Shiny extensions
 ----------------
 
-There are many ways to enhance and extend the functionality and sophistication of Shiny apps using existing tools and platforms. Javascript visualizations can be used in RShiny with a framework called **htmlwidgets**, which lets you access powerful features of tools like Leaflet, Plot.ly, and d3 within R. Since these frameworks are bridges to, or wrappers, for the original libraries and packages that may have been written in another programming language, deploying them requires becoming familiar with the logic and structure of the output objects being created. The [Leaflet package for R](https://rstudio.github.io/leaflet/) is well-integrated with other R packages like Shiny and sp however it is also useful to refer to the more extensive documentation of the [JavaScript library](http://leafletjs.com/reference.html).
+There are many ways to enhance and extend the functionality and sophistication of Shiny apps using existing tools and platforms. Javascript visualizations can be used in RShiny with a framework called **htmlwidgets**, which lets you access powerful features of tools like Leaflet, [plot.ly](https://plot.ly/r/shiny-tutorial/#plotly-graphs-in-shiny), and d3 within R. Since these frameworks are bridges to, or wrappers, for the original libraries and packages that may have been written in another programming language, deploying them requires becoming familiar with the logic and structure of the output objects being created. The [Leaflet package for R](https://rstudio.github.io/leaflet/) is well-integrated with other R packages like Shiny and sp however it is also useful to refer to the more extensive documentation of its [JavaScript library](http://leafletjs.com/reference.html).
+
+-   shinyjs: Enhance user experience in Shiny apps using JavaScript functions without knowing JavaScript
+-   ggvis: Similar to ggplot2, but the plots are focused on being web-based and are more interactive
 
 ### Leaflet
 
@@ -435,7 +439,9 @@ tabPanel("Map", leafletOutput("sesync_map"))
 
 ![](shiny_files/map3.png)
 
-Since drawing maps is computationally intensive, interactivity within the map is typically handed outside of the main render function using a function in the server called `leafletProxy()`, and the static map elements are handled within the first render function. However we can add some simple interactivity by assigning groups to **layers** and using the `addLayersControl()` function.
+Since drawing maps is computationally intensive, interactivity within the map is typically handed outside of the main render function using a function in the server called `leafletProxy()`, and the static map elements are handled within the first render function. See an example of how to implement this [here](http://www.r-bloggers.com/r-shiny-leaflet-using-observers/).
+
+We can add some simple interactivity by assigning groups to **layers** and using the `addLayersControl()` function.
 
 ``` r
   output$sesync_map <- renderLeaflet({
@@ -455,6 +461,7 @@ Additional references
 
 -   [Shiny cheat sheet by RStudio](http://www.rstudio.com/wp-content/uploads/2016/01/shiny-cheatsheet.pdf)
 -   [Shiny tutorial by RStudio](http://shiny.rstudio.com/tutorial/)
+-   [Building shiny app tutorial by Dean Attali](https://docs.google.com/presentation/d/1dXhqqsD7dPOOdcC5Y7RW--dEU7UfU52qlb0YD3kKeLw/edit#slide=id.p)
 -   [Principles of Reactivity](https://cdn.rawgit.com/rstudio/reactivity-tutorial/master/slides.html#/) by Joe Cheng
 -   [NEON Shiny tutorial](http://neondataskills.org/R/Create-Basic-Shiny-App-In-R/)
 -   [Input widget gallery](http://shiny.rstudio.com/gallery/widget-gallery.html)
@@ -462,4 +469,8 @@ Additional references
 -   [Leaflet](https://rstudio.github.io/leaflet/shiny.html)
 -   [Geospatial libraries for R](http://www.r-bloggers.com/ropensci-geospatial-libraries/)
 -   [Computerworld tutorial Create maps in R in 10 easy steps](http://www.computerworld.com/article/3038270/data-analytics/create-maps-in-r-in-10-fairly-easy-steps.html?page=2)
--   [plot.ly](https://plot.ly/r/shiny-tutorial/#plotly-graphs-in-shiny)
+-   [How web maps work](https://www.mapbox.com/help/how-web-maps-work/)
+
+-   **Example Shiny apps**
+-   <http://daattali.com/shiny/cancer-data/>
+-   <https://uasnap.shinyapps.io/nwtapp/>
