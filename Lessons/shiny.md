@@ -457,7 +457,7 @@ tabPanel("Map", leafletOutput("sesync_map"))
 
 ![](shiny_files/map3.png)
 
-Since drawing maps is computationally intensive, interactivity within the map is typically handed outside of the main render function using a function in the server called `leafletProxy()`, and the static map elements are handled within the first render function. See an example of how to implement this [here](http://www.r-bloggers.com/r-shiny-leaflet-using-observers/).
+Since drawing maps is computationally intensive, interactivity within the map is typically handed outside of the main render function using a function in the server called `leafletProxy()`, and the static map elements are handled within the first render function. See an example of how to implement this [here](http://www.r-bloggers.com/r-shiny-leaflet-using-observers/) and \[here\](<http://www.r-bloggers.com/climate-projections-by-cities-r-shiny-rcharts-leaflet/>.
 
 We can add some simple interactivity by assigning groups to **layers** and using the `addLayersControl()` function.
 
@@ -511,7 +511,10 @@ Other/ tutorials
 -   <https://github.com/aoles/ShinyDevCon-notes>
 -   [debugging in shiny](http://rpubs.com/jmcphers/149638)
 -   <http://egallic.fr/maps-with-r/>
--   
+-   [Shiny articles on r-bloggers](http://www.r-bloggers.com/?s=shiny)
+-   <http://www.r-bloggers.com/interactive-mapping-with-leaflet-in-r/>
+-   <http://www.r-bloggers.com/upload-shapefile-to-r-shiny-app-to-extract-leaflet-map-data/>
+-   [Top rated questions about shiny on stackoverflow](http://stackoverflow.com/questions/tagged/shiny?sort=votes&pageSize=15)
 
 Example Shiny apps
 ------------------
