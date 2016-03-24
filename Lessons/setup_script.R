@@ -6,7 +6,7 @@ install_missing <- function(pkgs, repos) {
 
 # Install packages required for the Spring 2016 Computational Institute
 pkg_list <- c("tidyr", "dplyr", "RSQLite", "sp", "rgdal", "rgeos",
-              "raster", "shiny")
+              "raster", "shiny", "shinythemes", "leaflet")
 
 install_missing(pkg_list, repos = "http://cran.us.r-project.org")
 
