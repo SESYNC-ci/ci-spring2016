@@ -61,7 +61,9 @@ function(input, output){
       addProviderTiles("Esri.WorldImagery") %>%
       addMarkers(lng = -76.505206, lat = 38.9767231, popup = "SESYNC") %>%
       addPolygons(fill = FALSE)   %>%
-      addRasterImage(mask(nlcd, nlcd == 41, maskvalue = FALSE), opacity = 0.5)
+      addRasterImage(mask(nlcd, nlcd == 41, maskvalue = FALSE), opacity = 0.5, group = "Deciduous Forest", colors = "green") %>%
+      addRasterImage(mask(nlcd, nlcd == 81, maskvalue = FALSE), opacity = 0.5, group = "Pasture", colors = "yellow") %>%
+      addLayersControl(baseGroups=c("Deciduous Forest", "Pasture"))
   })
 
 }

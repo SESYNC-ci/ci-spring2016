@@ -435,7 +435,20 @@ tabPanel("Map", leafletOutput("sesync_map"))
 
 ![](shiny_files/map3.png)
 
-Since drawing maps is computationally intensive, interactivity within the map is typically handed outside of the main render function using a function in the server called `leafletProxy()`, and the static map elements are handled within the first render function.
+Since drawing maps is computationally intensive, interactivity within the map is typically handed outside of the main render function using a function in the server called `leafletProxy()`, and the static map elements are handled within the first render function. However we can add some simple interactivity by assigning groups to **layers** and using the `addLayersControl()` function.
+
+``` r
+  output$sesync_map <- renderLeaflet({
+    leaflet(counties_md) %>% 
+      setView(lng = -76.505206, lat = 38.9767231, zoom = 14) %>%
+      addProviderTiles("Esri.WorldImagery") %>%
+      addMarkers(lng = -76.505206, lat = 38.9767231, popup = "SESYNC") %>%
+      addPolygons(fill = FALSE)   %>%
+      addRasterImage(mask(nlcd, nlcd == 41, maskvalue = FALSE), opacity = 0.5, group = "Deciduous Forest", colors = "green") %>%
+      addRasterImage(mask(nlcd, nlcd == 81, maskvalue = FALSE), opacity = 0.5, group = "Pasture", colors = "yellow") %>%
+      addLayersControl(baseGroups=c("Deciduous Forest", "Pasture"))
+  })
+```
 
 Additional references
 ---------------------
