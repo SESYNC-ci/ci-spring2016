@@ -24,7 +24,7 @@ File structure
 
 Shiny was developed by RStudio with the intention of making plots more dynamic and interactive. It can be used for exploratory data analysis and visualization, to facilitate remote collaboration, share results, and [much more](http://shiny.rstudio.com/gallery/).
 
-When the `shiny` package is installed and loaded, RStudio will identify this file structure and create a green arrow with a **Run App** button when you open a file in the app. Note that the file names must be exactly as specified. When applications are running, they are displayed in a separate browser window or the RStudio Viewer pane.
+The `shiny` package includes some built-in examples to demonstrate some of its basic features. When applications are running, they are displayed in a separate browser window or the RStudio Viewer pane.
 
 > See how this works by running one of the [built-in examples](http://shiny.rstudio.com/tutorial/lesson1/#Go%20Further) within the shiny package:
 
@@ -38,6 +38,8 @@ Depending on the purpose and computing requirements of any Shiny app, it may liv
 
 -   The **user interface** which defines what users will see in the app and its design.
 -   The **server** which defines the instructions for how to assemble components of the app like plots and input widgets.
+
+When the `shiny` package is installed and loaded, RStudio will identify this file structure and create a green arrow with a **Run App** button when you open a file in the app. Note that the file names must be exactly as specified.
 
 The appearance of the web page (the UI) is controlled by the computer running a live R session. When you are logged into [rstudio.sesync.org](rstudio.sesync.org), that session is running on a machine here. When you are using standalone RStudio, that session is running on your laptop or desktop. Users manipulate elements within the user interface, which triggers R code to run, in turn updating UI objects.
 
@@ -92,7 +94,7 @@ function(input, output){
 Input and Output Objects
 ========================
 
-The user interface and the server file interact with each other through **input** and **output** objects. The information in the server file is the recipe for how to construct input and objects in the ui, and the user's interaction with input objects alters output objects based on the code in the server file. Having your app function as you intend requires careful attention to how your input and output objects relate to each other, i.e. knowing what actions will initiate what sections of code to run at what time.
+The user interface and the server file interact with each other through **input** and **output** objects. The information in the server file is the recipe for how to construct output objects to display in the ui, and the user's interaction with input objects alters output objects based on the code in the server file. The instructinos for creating input objects are in the ui file. Having your app function as you intend requires careful attention to how your input and output objects relate to each other, i.e. knowing what actions will initiate what sections of code to run at what time.
 
 ![](shiny_files/arrows1.png) The diagram above depicts how input and output objects are referred to within the ui and server files. Input objects are created and named in the ui file with functions like `selectInput()` or `radioButtons()`. They are used within render functions in the server file to create output objects. Output objects are placed in the ui with output functions like `plotOutput()` or `textOutput()`.
 
@@ -190,7 +192,7 @@ Within the user interface, you arrange where elements appear by using a page lay
 
 ![](shiny_files/layout.png)
 
-The diagram above depicts nested UI elements in the sidebar layout. The red boxes represent input objects and the blue boxes represent output objects. Each object is located within one or more nested **panels**, which are nested within a **layout**. Notice that **tab panels** are nested within the **tabset panel**. Objects and panels that are at the same level of hierarchy need to be separated by commas.
+The diagram above depicts nested UI elements in the sidebar layout. The red boxes represent input objects and the blue boxes represent output objects. Each object is located within one or more nested **panels**, which are nested within a **layout**. Notice that **tab panels** are nested within the **tabset panel**. Objects and panels that are at the same level of hierarchy need to be separated by commas. Mistakes in usage of commas and parentheses between UI elements is one of the first things to look for when debugging a shiny app!
 
 The `fluidPage()` layout design consists of rows which contain columns of elements. To use it, you define the width of an element relative to a 12-unit grid within each column using the function `fluidRow()` and listing columns in units of 12. The argument `offset =` can be used to add extra spacing. For example:
 
@@ -300,7 +302,13 @@ navbarPage("csi app",
 Reactive objects
 ================
 
-Input objects that are used in multiple render functions to create different output objects can be created independently as **reactive** objects. This value is then cached to reduce computation required, since only the code to create this object is re-run when input values are updated. For example, in order to display both the plot and the data used in the plot, we had to duplicate portions of code in the `renderPlot()` and `renderDataTable()` functions. Use the function `reactive()` to create reactive objects and use them with function syntax, i.e. with `()`. Reactive objects are not output objects so do not use `output$` in front of their name.
+Input objects that are used in multiple render functions to create different output objects can be created independently as **reactive** objects. This value is then cached to reduce computation required, since only the code to create this object is re-run when input values are updated. For example, in order to display both the plot and the data used in the plot, we had to duplicate portions of code in the `renderPlot()` and `renderDataTable()` functions.
+
+![](shiny_files/objects-compare.png)
+
+The diagram above shows the relationship between input and output objects with (B) and without (A) the use of an intermediary reactive object. The surveys\_subset reactive object becomes cached in the app's memory so it does not need to be computed independently in both the plot and data output objects.
+
+Use the function `reactive()` to create reactive objects and use them with function syntax, i.e. with `()`. Reactive objects are not output objects so do not use `output$` in front of their name.
 
 ![](shiny_files/arrows2.png)
 
@@ -333,10 +341,6 @@ To use `surveys_subset` in render functions, refer to it with function syntax.
     surveys_subset()
   })
 ```
-
-![](shiny_files/objects-compare.png)
-
-The diagram above shows the relationship between input and output objects with (B) and without (A) the use of an intermediary reactive object. The surveys\_subset reactive object becomes cached in the app's memory so it does not need to be computed independently in both the plot and data output objects.
 
 Download or Upload
 ==================
@@ -384,6 +388,8 @@ Either share as files or as a webpage. To share as a webpage it will need to be 
 -   [How do I publish a Shiny app on the SESYNC server](https://collab.sesync.org/sites/support/Frequently%20Asked%20Questions/How%20do%20I%20publish%20a%20Shiny%20app%20on%20the%20SESYNC%20server.aspx)
 -   Use a `dependencies.R` or "helpers" file to load packages and data when deploying app outside of local environment
 
+<https://shiny.sesync.org/apps/csi-spring2016/>
+
 Shiny extensions
 ================
 
@@ -391,6 +397,16 @@ There are many ways to enhance and extend the functionality and sophistication o
 
 -   shinyjs: Enhance user experience in Shiny apps using JavaScript functions without knowing JavaScript
 -   ggvis: Similar to ggplot2, but the plots are focused on being web-based and are more interactive
+-   leaflet: geospatial mapping
+-   dygraphs: time series charting
+-   metricsgraphics: scatterplots and line charts with D3
+-   networkD3: graph data visualization with D3
+-   d3heatmap: interactive heatmaps with D3
+-   dataTables: tabular data display
+-   threejs: 3D scatterplots and globes
+-   DiagrammeR: Diagrams and flowcharts
+-   [exploding boxplot](https://rpubs.com/pssguy/143829)
+-   [interaction with table cells](https://yihui.shinyapps.io/DT-click/)
 
 Leaflet
 -------
@@ -473,17 +489,6 @@ We can add some simple interactivity by assigning groups to **layers** and using
       addLayersControl(baseGroups=c("Deciduous Forest", "Pasture"))
   })
 ```
-
--   leaflet: geospatial mapping
--   dygraphs: time series charting
--   metricsgraphics: scatterplots and line charts with D3
--   networkD3: graph data visualization with D3
--   d3heatmap: interactive heatmaps with D3
--   dataTables: tabular data display
--   threejs: 3D scatterplots and globes
--   DiagrammeR: Diagrams and flowcharts
--   [exploding boxplot](https://rpubs.com/pssguy/143829)
--   [interaction with table cells](https://yihui.shinyapps.io/DT-click/)
 
 Additional references
 =====================
