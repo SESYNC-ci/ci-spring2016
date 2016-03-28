@@ -32,7 +32,7 @@ x <- 1+2
 x
 ```
 
-Object names in R cannot start with a number or contain certain characters like commas or spaces. It is good practice to use informative names for objects and to adopt a convention for demarcating words. 
+Object names in R cannot start with a number or contain certain characters like commas or spaces. It is good practice to use informative names for objects and to adopt a convention for demarcating words. Be careful not to overwrite the names of basic functions like `c()` in naming your objects
 
 ```{r, eval = FALSE}
 i_use_snake_case
