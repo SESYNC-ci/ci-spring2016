@@ -20,7 +20,9 @@ suppressMessages({
     library(rgdal)
     library(rgeos)
     library(raster)
-    library(shiny)    
+    library(shiny)
+    library(shinythemes)
+    library(leaflet)
 })
 
 
