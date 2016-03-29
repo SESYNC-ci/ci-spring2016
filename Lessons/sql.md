@@ -3,25 +3,35 @@ Databases using SQL in R
 
 Introduction
 ------------
-* Relational databases formalize and to a large extent enforce concepts of tidy data
-* Each variable (or "field") forms a column; each observation is a row; e
+* Relational databases formalize and can enforce concepts of tidy data
+* Each variable (or "field") forms a column; each observation is a row; each data type is a table
+
+| tidyr | sql|
+|-------|-------|
+| filter| WHERE |
+| select | SELECT |
+| arrange | ORDER BY |
+| group_by | GROUP BY (always needs aggregate function in "SELECT")|
+| summarize | aggregate functions in the "SELECT" statement |
+| mutate | operations on a field in the SELECT statement |
+| join | "JOIN" |
 
 
-Relational databases
---------------------
-* Relational databases store data in tables with fields (columns) and records
-  (rows)
-* Data in tables has types, just like in R, and all values in a field have
-  the same type
+
+How are relational databases different?
+----------------------------------------
 * The data are distinct from the  questions we ask of them. We interact with the data through queries,
    so if we change the data we can just rerun the query. This also prevents us from accidentally changing the data.
 * Queries let us look up data or make calculations based on columns
+* The entire data set does not live in memory
  	   
 When to consider a relational design
 -------------------------------------
 ### If you want to...
 * link data classified or measured at multiple levels (e.g., plots, surveys, and species)
 * be able to ask multiple, ad-hoc questions about the data and aggregate and group it in different ways
+* enforce relationships between data elements
+* allow multiple people to use it
 
 Database Management Systems
 ---------------------------
@@ -30,7 +40,7 @@ data. We're going to use SQLite, but most everything
 will apply to the other database systems as well (e.g., MySQL, PostgreSQL, MS
 Access, Filemaker Pro). The main differences are in the details of how to import and export data.
 
-<!--- Kelly covering this in R intro
+<!--- 
 The data
 --------
 This is data on a small mammal community in southern Arizona over the last 35
@@ -76,11 +86,11 @@ RSQLite is a package that allows us to interact with a SQLite database in R.
 	library(RSQLite)
 
 Need to "open a connection" to the database so that R can communicate with it.
-SQLite requires a "driver" and "dbname." The same dataset Kelly showed you, has been imported into a SQLite database.
+SQLite requires a "driver" and "dbname." The same dataset from the previous lesson, has been imported into a SQLite database.
 This database contains three tables: surveys, species and plots
 
 	drv <- dbDriver("SQLite")
-	db <- "/nfs/public-data/CSI2015/portal_mammals.sqlite"
+	db <- "/nfs/public-data/ci-spring2016/Data/portal_mammals.sqlite"
 	con <- dbConnect(drv, db)
 
 Other types of relational databases may have other arguments like user and pwd.
