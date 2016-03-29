@@ -92,7 +92,7 @@ Why are `species` and `count` not quoted here? (They refer to existing column na
 
 ### Exercise
 
-Try removing a row from `count_gather` (e.g. `count_gather <- count_gather[-8, ]`). How does that affect the outcome of `spread`? Let's say the missing row means that no individual of that species was recorded on that day. How can you reflect that assumption in the outcome of `spread`? (Hint: Look at the help file for that function.)
+Try removing a row from `counts_gather` (e.g. `counts_gather <- counts_gather[-8, ]`). How does that affect the outcome of `spread`? Let's say the missing row means that no individual of that species was recorded on that day. How can you reflect that assumption in the outcome of `spread`? (Hint: Look at the help file for that function.)
 
 Key functions in dplyr
 ----------------------
@@ -175,7 +175,7 @@ To complete this section, we sort the 1990 winter surveys data by descending ord
 
 ``` r
 sorted1 <- arrange(surveys1990_winter, desc(species_id), weight)
-sorted2 <- surveys1990_winter[order(surveys1990_winter$species_id, -surveys1990_winter$weight),]
+sorted2 <- surveys1990_winter[order(-xtfrm(surveys1990_winter$species_id), surveys1990_winter$weight), ]
 head(sorted1)
 ```
 
