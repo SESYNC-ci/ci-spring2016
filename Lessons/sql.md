@@ -158,14 +158,14 @@ Or we can select all of the columns in a table using the wildcard *
 We've been using head() from R to just look at the first few rows, but
 SQL also has a function that will do this, called Limit
 
-	dbGetQuery(con, "SELECT DISTINCT year, species FROM surveys LIMIT 10";)
+	dbGetQuery(con, "SELECT year, species_id FROM surveys LIMIT 10";)
 		
 ### Unique values
 
 If we want only the unique values so that we can quickly see what species have
 been sampled we use ``DISTINCT``
 
-    dbGetQuery(con, "SELECT DISTINCT species FROM surveys;"))
+    dbGetQuery(con, "SELECT DISTINCT species_id FROM surveys;"))
 
 If we select more than one column, then the distinct pairs of values are
 returned
@@ -179,17 +179,17 @@ We can also do calculations with the values in a query.
 For example, if we wanted to look at the mass of each individual
 on different dates, but we needed it in kg instead of g we would use
 
-    dbGetQuery(con, "SELECT year, month, day, wgt/1000.0 FROM surveys;")
+    dbGetQuery(con, "SELECT year, month, day, weight/1000.0 FROM surveys;")
 
-When we run the query, the expression ``wgt / 1000.0`` is evaluated for each row
+When we run the query, the expression ``weight / 1000.0`` is evaluated for each row
 and appended to that row, in a new column.  Expressions can use any fields, any
-arithmetic operators (+ - * /) and a variety of built-in functions (). For
+arithmetic operators (+ - * /) and a variety of built-in functions. For
 example, we could round the values to make them easier to read.
 
-    dbGetQuery(con," SELECT plot, species, sex, wgt, ROUND(wgt / 1000.0, 2) FROM surveys;")
+    dbGetQuery(con," SELECT plot_id, species_id, sex, weight, ROUND(weight / 1000.0, 2) FROM surveys;")
 
 The underlying data in the wgt column of the table does not change. The query, which exists separately from the data,
-simply displays the calculation we requested in the query result window pane.
+simply displays the calculation we requested in the query result window pane. You can assign the new column a name by typing "AS weight_kg" after the expression
 
 ***EXERCISE: Write a query that returns
              the year, month, day, species ID, and weight in mg***
@@ -202,32 +202,33 @@ criteria.  For example, let’s say we only want data for the species Dipodomys
 merriami, which has a species code of DM.  We need to add a WHERE clause to our
 query:
 
-    dbGetQuery(con, "SELECT * FROM surveys WHERE species='DM';")
+    dbGetQuery(con, "SELECT * FROM surveys WHERE species_id='DM';")
 
 We can do the same thing with numbers.
 Here, we only want the data since 2000:
 
-    "SELECT * FROM surveys WHERE year >= 2000;"
+    dbGetQuery(con, "SELECT * FROM surveys WHERE year >= 2000;")
 	
 We can use more sophisticated conditions by combining tests with AND and OR.
 For example, suppose we want the data on Dipodomys merriami starting in the year
 2000:
 
-    dbGetQuery(con, "SELECT * FROM surveys WHERE (year >= 2000) AND (species = 'DM');")
+    dbGetQuery(con, "SELECT * FROM surveys WHERE (year >= 2000) AND (species_id = 'DM');")
 
 Note that the parentheses aren’t needed, but again, they help with readability.
 They also ensure that the computer combines AND and OR in the way that we
 intend.
-
+<!--
 If we wanted to get data for any of the Dipodomys species,
 which have species codes DM, DO, and DS we could combine the tests using OR:
 
-    SELECT * FROM surveys WHERE (species = "DM") OR (species = "DO") OR (species = "DS");
+    SELECT * FROM surveys WHERE (species_id = "DM") OR (species_id = "DO") OR (species_id = "DS");
 
 ***EXERCISE: Write a query that returns
    The day, month, year, species ID, and weight (in kg) for
    individuals caught on Plot 1 that weigh more than 75 g***
-
+-->
+   
 <!--- Applicable in Firefox SQLite interface 
 Saving & Exporting queries
 --------------------------
@@ -270,20 +271,20 @@ For simplicity, let’s go back to the species table and alphabetize it by taxa.
 The keyword ASC tells us to order it in Ascending order.
 We could alternately use DESC to get descending order.
 
-    SELECT * FROM species ORDER BY taxa DESC;
+    dbGetQuery(con, "SELECT * FROM species ORDER BY taxa DESC;")
 
 ASC is the default.
 
 We can also sort on several fields at once.
 To truly be alphabetical, we might want to order by genus then species.
 
-    SELECT * FROM species ORDER BY genus ASC, species ASC;
+    dbGetQuery(con, "SELECT * FROM species ORDER BY genus ASC, species ASC;")
 
 ***Exercise: Write a query that returns
              year, species, and weight in kg from the surveys table, sorted with
              the largest weights at the top***
 
-<!--
+
 Order of execution
 ------------------
 
@@ -291,7 +292,7 @@ Another note for ordering. We don’t actually have to display a column to sort by
 it.  For example, let’s say we want to order by the species ID, but we only want
 to see genus and species.
 
-    SELECT genus, species FROM species ORDER BY taxon ASC;
+    dbGetQuery(con, "SELECT genus, species FROM species ORDER BY species_id ASC;")
 
 We can do this because sorting occurs earlier in the computational pipeline than
 field selection.
@@ -301,7 +302,7 @@ The computer is basically doing this:
 1. Filtering rows according to WHERE
 2. Sorting results according to ORDER BY
 3. Displaying requested columns or expressions.
--->
+
 
 Order of clauses
 ----------------
@@ -328,12 +329,12 @@ Using the wildcard simply counts the number of records (rows)
 
 We can also find out how much all of those individuals weigh.
 
-    dbGetQuery(con, "SELECT COUNT(*), SUM(wgt) FROM surveys;")
+    dbGetQuery(con, "SELECT COUNT(*), SUM(weight) FROM surveys;")
 
 ***Do you think you could output this value in kilograms, rounded to 3 decimal
    places?***
 
-    SELECT ROUND(SUM(wgt)/1000.0, 3) FROM surveys
+    dbGetQuery(con, "SELECT ROUND(SUM(weight)/1000.0, 3) FROM surveys;")
 
 There are many other aggregate functions included in SQL including
 MAX, MIN, and AVG.
@@ -344,9 +345,9 @@ MAX, MIN, and AVG.
 Now, let's see how many individuals were counted in each species. We do this
 using a GROUP BY clause
 
-    dbGetQuery(con, "SELECT species, COUNT(*)
+    dbGetQuery(con, "SELECT species_ID, COUNT(*)
 				     FROM surveys
-				     GROUP BY species;")
+				     GROUP BY species_ID;")
 
 GROUP BY tells SQL what field or fields we want to use to aggregate the data.
 If we want to group by multiple fields, we give GROUP BY a comma separated list.
@@ -354,17 +355,19 @@ If we want to group by multiple fields, we give GROUP BY a comma separated list.
 ***EXERCISE: Write queries that return:***
 ***1. How many individuals were counted in each year***
 ***2. Average weight of each species in each year**
+Hint: To exclude missing data from the average, we can use the SQL test for missing IS NULL (or in this case, IS NOT NULL)
 
-<!---
+
 We can order the results of our aggregation by a specific column, including the
 aggregated column.  Let’s count the number of individuals of each species
 captured, ordered by the count
 
-    SELECT species, COUNT(*)
+dbGetQuery(con, 
+    "SELECT species_id, COUNT(*)
     FROM surveys
-    GROUP BY species
-    ORDER BY COUNT(species)
--->
+    GROUP BY species_id
+    ORDER BY COUNT(*);")
+
 
 Joins
 -----
@@ -378,7 +381,7 @@ species codes.
 
     dbGetQuery(con, "SELECT *
                      FROM surveys
-                     JOIN species ON surveys.species = species.species_id;")
+                     JOIN species ON surveys.species_id = species.species_id;")
 
 ON is like WHERE, it filters things out according to a test condition.  We use
 the table.colname format to tell the manager what column in which table we are
@@ -390,22 +393,22 @@ have used a field name in a non-join query, we can use *table.colname*
 For example, what if we wanted information on when individuals of each
 species were captured, but instead of their species ID we wanted their
 actual species names.
-
-    SELECT surveys.year, surveys.month, surveys.day, species.genus, species.species
-    FROM surveys
-    JOIN species ON surveys.species = species.species_id
+	dbGetQuery(con,
+		"SELECT surveys.year, surveys.month, surveys.day, species.genus, species.species
+		FROM surveys
+		JOIN species ON surveys.species_id = species.species_id;")
 
 ***Exercise: Write a query that returns the genus, the species, and the weight
    of every individual captured at the site***
 
 Joins can be combined with sorting, filtering, and aggregation.  So, if we
 wanted average mass of the individuals on each type of plot, we could use
-
-    SELECT plots.plot_type, AVG(surveys.wgt)
-    FROM surveys
-    JOIN plots
-    ON surveys.plot = plots.plot_id
-    GROUP BY plots.plot_type
+	dbGetQuery(con, 
+		"SELECT plots.plot_type, AVG(surveys.weight)
+		FROM surveys
+		JOIN plots
+		ON surveys.plot = plots.plot_id
+		GROUP BY plots.plot_type;")
 	
 Use ```dbDisconnect()``` to close the connection between R and SQL. Only a limited number can be open at a given time..	
 	
@@ -452,5 +455,5 @@ Additional Resources and Information
 * Database design tips: https://www.periscope.io/blog/better-sql-schema.html
  
 	   
-Adapted by Mary Shelley for SESYNC CSI 2015 from Data Carpentry SQL lesson, authored by Ethan White
+Adapted by Mary Shelley for SESYNC ci-spring 2016 from Data Carpentry SQL lesson, authored by Ethan White
 https://github.com/datacarpentry/archive-datacarpentry/blob/master/lessons/sql/sql.md
