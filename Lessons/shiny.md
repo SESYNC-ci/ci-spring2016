@@ -7,6 +7,8 @@
 -   [Reactive objects](#reactive-objects)
 -   [Download or Upload](#download-or-upload)
 -   [Share your app](#share-your-app)
+    -   [Share as files](#share-as-files)
+    -   [Share as a website](#share-as-a-website)
 -   [Shiny extensions](#shiny-extensions)
     -   [Leaflet](#leaflet)
 -   [Additional references](#additional-references)
@@ -17,7 +19,7 @@
 Interactive web applications in R
 =================================
 
-This lesson presents an introduction to creating interactive web applications using the [Shiny](https://cran.r-project.org/web/packages/shiny/index.html) package in R. We will learn about the basic building blocks of a Shiny app, how to create interactive elements, customize them, and arrange them on a page by building a Shiny app with parts of the [Portals teaching database](https://github.com/weecology/portal-teachingdb). We will also use [Leaflet](https://rstudio.github.io/leaflet/) to put an map in the app. This lesson builds on concepts covered in the [data manipulation](https://github.com/SESYNC-ci/ci-spring2016/blob/master/Lessons/tidyr_dplyr.md) and [geospatial](https://github.com/SESYNC-ci/ci-spring2016/blob/master/Lessons/geospatial.md) lessons and requires the `shiny`, `dplyr`, and `leaflet` libraries.
+This lesson presents an introduction to creating interactive web applications using the [Shiny](https://cran.r-project.org/web/packages/shiny/index.html) package in R. We will learn about the basic building blocks of a Shiny app, how to create interactive elements, customize them, and arrange them on a page by building a Shiny app with parts of the [Portals teaching database](https://github.com/weecology/portal-teachingdb). We will also use [Leaflet](https://rstudio.github.io/leaflet/) to put an map in the app. This lesson builds on concepts covered in the [data manipulation](https://github.com/SESYNC-ci/ci-spring2016/blob/master/Lessons/tidyr_dplyr.md) and [geospatial](https://github.com/SESYNC-ci/ci-spring2016/blob/master/Lessons/geospatial.md) lessons and requires the `shiny`, `dplyr`, and `leaflet` libraries. You can see the final version of the app that we will make [here](https://shiny.sesync.org/apps/csi-spring2016/).
 
 File structure
 ==============
@@ -190,7 +192,7 @@ Design and Layout
 
 Within the user interface, you arrange where elements appear by using a page layout. You can organize elements using pre-defined high level layouts such as `sidebarLayout()`, `splitLayout()`, or `verticalLayout()`, or you can use `fluidRow()` to organize rows of elements within a grid. Elements can be layered on top of each other using `tabsetPanel()`, `navlistPanel()`, or `navbarPage()`.
 
-![](shiny_files/layout.png)
+![](shiny_files/layout2.png)
 
 The diagram above depicts nested UI elements in the sidebar layout. The red boxes represent input objects and the blue boxes represent output objects. Each object is located within one or more nested **panels**, which are nested within a **layout**. Notice that **tab panels** are nested within the **tabset panel**. Objects and panels that are at the same level of hierarchy need to be separated by commas. Mistakes in usage of commas and parentheses between UI elements is one of the first things to look for when debugging a shiny app!
 
@@ -382,18 +384,27 @@ Uploading files is possible with the input function `fileInput()` to create an i
 Share your app
 ==============
 
-Either share as files or as a webpage. To share as a webpage it will need to be hosted somewhere. There is limited free hosting available through RStudio with [shinapps.io](http://www.shinyapps.io/). SESYNC has a shiny server to host apps as well. There is a series of articles on the RStudio website [here](http://shiny.rstudio.com/articles/) about deploying apps.
+Once you have made an app, there are several ways to share it with others. It is important to make sure that everything the app needs to run (data and packages) will be loaded into the R session. For example, this can be accomplished by using a `dependencies.R` or "helpers" file to load packages and data when deploying app outside of local environment, and then using the `source()` function at the beginning of the server.R and ui.R files to run that file when the app is loaded.
 
--   <http://shiny.rstudio.com/tutorial/lesson7/>
+Share as files
+--------------
+
+-   email or copy ui.R, server.R, and all required data files
+-   use functions in the shiny package to run app from files hosted on the web. For example, the files and data for the shiny app we are building are located in a github repo and can be run using `shiny::runGitHub("khondula/csi-app", "khondula")`
+
+Share as a website
+------------------
+
+To share as a webpage it will need to be hosted somewhere, i.e. there needs to be a computer running the R code that powers the app. There is limited free hosting available through RStudio with [shinapps.io](http://www.shinyapps.io/). SESYNC has a shiny server to host apps as well. There is a series of articles on the RStudio website [here](http://shiny.rstudio.com/articles/) about deploying apps.
+
 -   [How do I publish a Shiny app on the SESYNC server](https://collab.sesync.org/sites/support/Frequently%20Asked%20Questions/How%20do%20I%20publish%20a%20Shiny%20app%20on%20the%20SESYNC%20server.aspx)
--   Use a `dependencies.R` or "helpers" file to load packages and data when deploying app outside of local environment
-
-<https://shiny.sesync.org/apps/csi-spring2016/>
 
 Shiny extensions
 ================
 
 There are many ways to enhance and extend the functionality and sophistication of Shiny apps using existing tools and platforms. Javascript visualizations can be used in RShiny with a framework called **htmlwidgets**, which lets you access powerful features of tools like Leaflet, [plot.ly](https://plot.ly/r/shiny-tutorial/#plotly-graphs-in-shiny), and d3 within R. Since these frameworks are bridges to, or wrappers, for the original libraries and packages that may have been written in another programming language, deploying them requires becoming familiar with the logic and structure of the output objects being created. The [Leaflet package for R](https://rstudio.github.io/leaflet/) is well-integrated with other R packages like Shiny and sp however it is also useful to refer to the more extensive documentation of its [JavaScript library](http://leafletjs.com/reference.html).
+
+**Some shiny extensions**
 
 -   shinyjs: Enhance user experience in Shiny apps using JavaScript functions without knowing JavaScript
 -   ggvis: Similar to ggplot2, but the plots are focused on being web-based and are more interactive
