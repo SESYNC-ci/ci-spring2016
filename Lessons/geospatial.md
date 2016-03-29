@@ -18,7 +18,7 @@ Importing vector data
 
 We start by importing a layer of polygons corresponding to US counties. The data is available from the US Census website (<http://www2.census.gov/geo/tiger/GENZ2014/shp/cb_2014_us_county_500k.zip>), but we will load a local copy from the SESYNC server.
 
-In the code below, we load two R packages: **sp** and **rgdal**. The former defines spatial data classes in R and is thus a prerequisite for most other spatial analyses packages; the latter is an interface to the open source Geospatial Data Abstraction Library (GDAL) that enables R to import spatial data stored in different file formats. Note that to use rgdal on your personal computer, you need to first [install GDAL](http://trac.osgeo.org/gdal/wiki/DownloadingGdalBinaries).
+In the code below, we load two R packages: **sp** and **rgdal**. The former defines spatial data classes in R and is thus a prerequisite for most other spatial analyses packages; the latter is an interface to the open source Geospatial Data Abstraction Library (GDAL) that enables R to import spatial data stored in different file formats. Note that in order to use rgdal in a Linux/UNIX environment, you need to first [install GDAL](http://trac.osgeo.org/gdal/wiki/DownloadingGdalBinaries).
 
 To import a .shp shapefile, we call the `readOGR` function from rgdal. This function takes at minimum two arguments, corresponding to the file location (`dsn`) and layer name (`layer`); in general, the layer name should match the filename without its extension.
 
@@ -108,12 +108,12 @@ Coordinate transformations
 For the next part of this lesson, we import a new polygon layer corresponding to the 1:250k map of US hydrological units (HUC) downloaded from the United States Geological Survey (<http://water.usgs.gov/GIS/dsdl/huc250k_shp.zip>).
 
 ``` r
-huc <- readOGR(dsn = "../Geodata/huc250k.shp", layer = "huc250k", 
-               stringsAsFactors = FALSE)
+huc <- readOGR(dsn = "/nfs/public-data/ci-spring2016/Geodata/huc250k.shp", 
+               layer = "huc250k", stringsAsFactors = FALSE)
 ```
 
     ## OGR data source with driver: ESRI Shapefile 
-    ## Source: "../Geodata/huc250k.shp", layer: "huc250k"
+    ## Source: "/nfs/public-data/ci-spring2016/Geodata/huc250k.shp", layer: "huc250k"
     ## with 2158 features
     ## It has 10 fields
 
@@ -148,7 +148,7 @@ plot(huc, add = TRUE, border = "blue")
 Geometric operations on vector layers
 -------------------------------------
 
-The **rgeos** package, a R interface to the open source geometry engine GEOS (<http://trac.osgeo.org/geos/>), provides various functions to modify and transform the geometric objects in one or more vector layers.
+The **rgeos** package, a R interface to the open source geometry engine [GEOS](http://trac.osgeo.org/geos/), provides various functions to modify and transform the geometric objects in one or more vector layers.
 
 The last map we produced in the previous section (MD counties and hydrological units) is rather hard to read. Let's consider the following improvements:
 
@@ -191,7 +191,7 @@ We start by loading the **raster** package in R and importing a raster file with
 
 ``` r
 library(raster)
-nlcd <- raster("../Geodata/nlcd_agg.grd")
+nlcd <- raster("/nfs/public-data/ci-spring2016/Geodata/nlcd_agg.grd")
 nlcd # show raster properties
 ```
 
@@ -200,7 +200,7 @@ nlcd # show raster properties
     ## resolution  : 150, 150  (x, y)
     ## extent      : 1394535, 1845135, 1724415, 2101515  (xmin, xmax, ymin, ymax)
     ## coord. ref. : +proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs 
-    ## data source : /nfs/pmarchand-data/Training/ci-spring2016/Geodata/nlcd_agg.grd 
+    ## data source : /nfs/public-data/ci-spring2016/Geodata/nlcd_agg.grd 
     ## names       : nlcd_2011_landcover_2011_edition_2014_03_31 
     ## values      : 0, 95  (min, max)
     ## attributes  :
@@ -359,7 +359,7 @@ data.frame(names(huc_md), modal_lc)
     ## 28               1121 Blackwater-Wicomico              Cultivated Crops
     ## 29                     1128 Lower Potomac              Deciduous Forest
     ## 30                            1164 Severn              Cultivated Crops
-    ## 31              1190 Lower Chesapeake Bay                    Open Water
+    ## 31              1190 Lower Chesapeake Bay Emergent Herbaceuous Wetlands
 
 For a more detailed introduction to the raster package, you can consult [this vignette in CRAN](http://cran.r-project.org/web/packages/raster/vignettes/Raster.pdf).
 

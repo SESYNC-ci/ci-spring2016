@@ -1,13 +1,6 @@
 # server.R
-library(dplyr)
-library(shiny)
-library(shinythemes)
+source("dependencies.R")
 # Read in data
-plots <- read.csv("Data/plots.csv", stringsAsFactors = FALSE)
-species <- read.csv("Data/species.csv", stringsAsFactors = FALSE)
-surveys <- read.csv("Data/surveys.csv", na.strings = "", stringsAsFactors = FALSE)
-counties_md <- readRDS("/nfs/public-data/ci-spring2016/Geodata/huc_md.RData")
-nlcd <- raster("/nfs/public-data/ci-spring2016/Geodata/nlcd_agg.grd")
 
 function(input, output){
   
@@ -60,11 +53,17 @@ function(input, output){
     leaflet(counties_md) %>% 
       setView(lng = -76.505206, lat = 38.9767231, zoom = 14) %>%
       addProviderTiles("Esri.WorldImagery") %>%
-      addMarkers(lng = -76.505206, lat = 38.9767231, popup = input$pick_taxa) %>%
-      addPolygons(fill = FALSE)   %>%
+      addMarkers(lng = -76.505206, lat = 38.9767231, popup = "sesync") %>%
+      addPolygons(fill = FALSE) %>%
       addRasterImage(mask(nlcd, nlcd == 41, maskvalue = FALSE), opacity = 0.5, group = "Deciduous Forest", colors = "green") %>%
       addRasterImage(mask(nlcd, nlcd == 81, maskvalue = FALSE), opacity = 0.5, group = "Pasture", colors = "yellow") %>%
       addLayersControl(baseGroups=c("Deciduous Forest", "Pasture"))
   })
+  
+  # observe({
+  #   leafletProxy("sesync_map") %>%
+  #     clearShapes() %>%
+  #     addRasterImage(mask(nlcd, nlcd == 41, maskvalue = FALSE), opacity = input$opacity_slider, group = "Deciduous Forest", colors = "green")
+  #     })
 
 }
