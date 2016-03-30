@@ -6,7 +6,7 @@ Introduction
 * Relational databases formalize and can enforce concepts of tidy data
 * Each variable (or "field") forms a column; each observation is a row; each data type is a table
 
-| tidyr | sql|
+| dplyr | sql|
 |-------|-------|
 | filter| WHERE |
 | select | SELECT |
@@ -63,7 +63,7 @@ Database Design
 3. One field per type of information	
 4. No redundant information
      * Split into separate tables with one table per class of information
-	 * Needs an identifier in common between tables – shared column - to
+	 * Needs an identifier in common between tables â€“ shared column - to
        reconnect (foreign key).
 	   
 SQL (and SQL in R)
@@ -104,7 +104,7 @@ Here we have data on every individual that was captured at the site,
 including when they were captured, what plot they were captured on,
 their species ID, sex and weight in grams.
 
-Let’s write an SQL query that selects only the year column from the surveys
+Letâ€™s write an SQL query that selects only the year column from the surveys
 table.
 
 We'll use the R command dbGetQuery to do this. It requires a connection object
@@ -135,7 +135,7 @@ what you're doing.
 	surv_yr <- dbGetQuery(con, "SELECT year FROM surveys;")	
 	
 A note on style: we have capitalized the words SELECT and FROM because they are SQL keywords.
-Unlike R, SQL is case insensitive, but it helps for readability – good style. Because the
+Unlike R, SQL is case insensitive, but it helps for readability â€“ good style. Because the
 SQL statement is inside quotation marks, R treats it like any other character string and simply
 passes the string to the database via the dbGetQuery function. So, the SQL statement is still case
 insensitive.	
@@ -197,8 +197,8 @@ simply displays the calculation we requested in the query result window pane. Yo
 Filtering
 ---------
 
-Databases can also filter data – selecting only the data meeting certain
-criteria.  For example, let’s say we only want data for the species Dipodomys
+Databases can also filter data â€“ selecting only the data meeting certain
+criteria.  For example, letâ€™s say we only want data for the species Dipodomys
 merriami, which has a species code of DM.  We need to add a WHERE clause to our
 query:
 
@@ -215,7 +215,7 @@ For example, suppose we want the data on Dipodomys merriami starting in the year
 
     dbGetQuery(con, "SELECT * FROM surveys WHERE (year >= 2000) AND (species_id = 'DM');")
 
-Note that the parentheses aren’t needed, but again, they help with readability.
+Note that the parentheses arenâ€™t needed, but again, they help with readability.
 They also ensure that the computer combines AND and OR in the way that we
 intend.
 <!--
@@ -243,7 +243,7 @@ Building more complex queries
 -----------------------------
 
 Now, lets combine the above queries to get data for the 3 Dipodomys species from
-the year 2000 on.  This time, let’s use IN as one way to make the query easier
+the year 2000 on.  This time, letâ€™s use IN as one way to make the query easier
 to understand.  It is equivalent to saying ``WHERE (species = "DM") OR (species
 = "DO") OR (species = "DS")``, but reads more neatly:
 
@@ -264,7 +264,7 @@ Sorting
 -------
 
 We can also sort the results of our queries by using ORDER BY.
-For simplicity, let’s go back to the species table and alphabetize it by taxa.
+For simplicity, letâ€™s go back to the species table and alphabetize it by taxa.
 
     dbGetQuery(con, "SELECT * FROM species ORDER BY taxa ASC;")
 
@@ -288,8 +288,8 @@ To truly be alphabetical, we might want to order by genus then species.
 Order of execution
 ------------------
 
-Another note for ordering. We don’t actually have to display a column to sort by
-it.  For example, let’s say we want to order by the species ID, but we only want
+Another note for ordering. We donâ€™t actually have to display a column to sort by
+it.  For example, letâ€™s say we want to order by the species ID, but we only want
 to see genus and species.
 
     dbGetQuery(con, "SELECT genus, species FROM species ORDER BY species_id ASC;")
@@ -322,7 +322,7 @@ Aggregation
 Aggregation allows us to group records based on field values and
 calculate combined values in groups (or for a table as a whole).
 
-Let’s go to the surveys table and find out how many individuals there are.
+Letâ€™s go to the surveys table and find out how many individuals there are.
 Using the wildcard simply counts the number of records (rows)
 
     dbGetQuery(con, "SELECT COUNT(*) FROM surveys;")
@@ -359,7 +359,7 @@ Hint: To exclude missing data from the average, we can use the SQL test for miss
 
 
 We can order the results of our aggregation by a specific column, including the
-aggregated column.  Let’s count the number of individuals of each species
+aggregated column.  Letâ€™s count the number of individuals of each species
 captured, ordered by the count
 
 dbGetQuery(con, 
@@ -443,7 +443,7 @@ Q & A on Database Design (review if time)
 3. One field per type of information
 4. No redundant information
      * Split into separate tables with one table per class of information
-	 * Needs an identifier in common between tables – shared column - to
+	 * Needs an identifier in common between tables â€“ shared column - to
        reconnect (foreign key).
 	   
 Additional Resources and Information
