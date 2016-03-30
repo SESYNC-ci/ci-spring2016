@@ -1,42 +1,24 @@
--   [Anatomy of RStudio](#anatomy-of-rstudio)
--   [Running code](#running-code)
-    -   [Comments](#comments)
--   [Getting help\*\*](#getting-help)
+-   [Welcome to RStudio](#welcome-to-rstudio)
+-   [Vectors](#vectors)
 -   [Data frames](#data-frames)
 -   [Loading data into R](#loading-data-into-r)
-    -   [Read in your data](#read-in-your-data)
-    -   [Viewing data frames](#viewing-data-frames)
-    -   [Some basic math functions in R](#some-basic-math-functions-in-r)
--   [Data types in R](#data-types-in-r)
-    -   [Get quick overview](#get-quick-overview)
-    -   [Types of Vectors](#types-of-vectors)
+-   [Types of Vectors](#types-of-vectors)
 -   [Basic Manipulation of Data frames](#basic-manipulation-of-data-frames)
-    -   [Subsetting with brackets](#subsetting-with-brackets)
-    -   [Subsetting with $ and double brackets](#subsetting-with-and-double-brackets)
-    -   [Subsetting and assignment](#subsetting-and-assignment)
-    -   [Selecting rows based on a condition](#selecting-rows-based-on-a-condition)
 -   [Base plotting](#base-plotting)
-    -   [Scatterplots](#scatterplots)
-    -   [Histograms](#histograms)
-    -   [Boxplots](#boxplots)
-    -   [Graphical parameters](#graphical-parameters)
-    -   [Mulit-panel plots](#mulit-panel-plots)
-    -   [Saving figures](#saving-figures)
 -   [Writing your own functions](#writing-your-own-functions)
-    -   [Basic syntax of a function](#basic-syntax-of-a-function)
 -   [Additional resources and references](#additional-resources-and-references)
 
-R is a programming language that we will interact with through the *interactive development environment* called RStudio. We are using RStudio server in a browser window in order to connect with other services at SESYNC, but most of what we will cover also applies to the RStudio program that runs as a standalone program on your computer.
+R is a programming language that we will use in the *interactive development environment* called RStudio. For this lesson, we are using RStudio server in a browser window in order to connect with other services at SESYNC like file storage and the cluster, but most of what we will cover also applies to the RStudio program that runs as a standalone program on your computer.
 
-Anatomy of RStudio
+Welcome to RStudio
 ==================
 
--   **Console** where you interact with the current R session.
--   **Environment/History**
--   **Files/plots/help/packages** tabs in lower right
--   When you open a new file (e.g. an R script), it will appear in the top left panel. With the latest version of RStudio, you can pop out these tabbed panels.
+There are 4 main panels on the screen:
 
-Learn about cutomizing the appearance and funcitonality of RStudio [here](https://support.rstudio.com/hc/en-us/articles/200549016-Customizing-RStudio) such as the color theme, default pane arrangement, and how line wrapping is handled.
+-   The **Console** where you interact with the current R session.
+-   **Environment/History** which is initially empty
+-   **Files/plots/help/packages**
+-   When you open a new file (e.g. an R script), it will appear in the top left panel. With the latest version of RStudio, you can pop out these tabbed panels.
 
 Type into the console at the `>` prompt to get a response like a calculator
 
@@ -46,7 +28,11 @@ Type into the console at the `>` prompt to get a response like a calculator
 
     ## [1] 3
 
-Assign a value to an object with the syntax `objectName <- value`. RStudio has a shortcut for using the assignment operator: Alt + - (Option + - on Mac).
+Perform some calculations in the R Console. Click over to the **History** tab to see that each of the commands you have given R to do are saved. You can access your history by using the up arrow when your cursor is in the Console.
+
+Assign a value to an object with the syntax `objectName <- value`. RStudio has a keyboard shortcut for using the assignment operator since we will use it often: Alt + - (Option + - on Mac).
+
+What is happening in each of these lines of code? Which line returns something in the Console?
 
 ``` r
 x <- 1+2
@@ -55,16 +41,10 @@ x
 
     ## [1] 3
 
-Object names in R cannot start with a number or contain certain characters like commas or spaces. It is good practice to use informative names for objects and to adopt a convention for demarcating words.
-
-``` r
-i_use_snake_case
-other.people.use.periods
-evenOthersUseCamelCase
-```
+Object names in R cannot start with a number or contain certain characters like commas or spaces. Find out more guidance on code style [here](http://adv-r.had.co.nz/Style.html).
 
 Running code
-============
+------------
 
 Using a programming language like R, you can record the steps of your analysis by saving them in a file. Run sections of code from the script panel by:
 
@@ -72,10 +52,9 @@ Using a programming language like R, you can record the steps of your analysis b
 -   Using cmd/ctrl (mac/pc) and Enter, which will run the line of code where your cursor is
 -   run an entire .R file by clicking "Source", or using the [`source()` function](https://stat.ethz.ch/R-manual/R-devel/library/base/html/source.html)
 
-Comments
---------
+**Comments**: Any line that starts with a `#` is not run by the computer, but is a great way to explain the steps of the analsysis you are doing
 
-Any line that starts with a `#` is not run by the computer, but is a great way to explain the steps of the analsysis you are doing
+> Open up a new R Script file and perform some calculations. Use comments to describe each line
 
 ``` r
 # this is the beginning of my analysis
@@ -84,7 +63,50 @@ Any line that starts with a `#` is not run by the computer, but is a great way t
 
     ## [1] 3
 
-We can create a list of numbers, called a **vector**, by combining them together using `c()`. If the numbers are all in order, the `:` is a short-cut to not need to type them all out.
+``` r
+# create x from sum of numbers
+x <- 1 + 4 + 5
+# view x
+x
+```
+
+    ## [1] 10
+
+**Some basic math functions in R**
+
+``` r
+*, +, -, /, ^, %%, %/%
+abs, sign
+acos, asin, atan, atan2
+sin, cos, tan
+ceiling, floor, round, trunc, signif
+exp, log, log10, log2, sqrt
+
+max, min, prod, sum
+cummax, cummin, cumprod, cumsum, diff
+pmax, pmin
+range
+mean, median, cor, sd, var
+rle
+```
+
+Getting help
+------------
+
+There are many ways to get help with R and RStudio, including functionality built into the program. Search using the help tab on the lower right, or use the question mark function. Let's see if there is an easy way to find the mean of a sequence of numbers
+
+``` r
+?mean
+```
+
+`mean` is an example of a function in R. The help documentation shows an example usage with the name of the function, an open parenthesis, x, and a close parenthesis. (Let's ignore the ellipsis for now.)
+
+Vectors
+=======
+
+Vectors are the basic data structure in R. They contain a list of things in order. **Atomic vectors** contain all of the same type of element, such as numbers. Create a vector by combining things together using the function `c()`. If the numbers are all in order, the operator `:` is a short-cut to not need to type them all out.
+
+> Use `c()` and `:` to create some vectors
 
 ``` r
 c(3,4,5,6,7)
@@ -98,7 +120,7 @@ c(3:7)
 
     ## [1] 3 4 5 6 7
 
-Store your vector by giving it a name and using the **assignment operator** `<-`. Then you can refer to the items in that list by using its name. Use bracket notation to refer to a selected item or selection of items in that list.
+Store your vector by giving it a name and using the **assignment operator** `<-`. Then you can refer to the items in that vecotr by using its name. Use bracket notation to refer to a selected item or selection of items in that list.
 
 ``` r
 mynumbers <- c(1:10) # store vector with assignment operator
@@ -113,46 +135,35 @@ mynumbers[3]
 
     ## [1] 3
 
-> Exercise: Store the first and last numbers of your vector in a new object.
+> Exercise: Store the first and last numbers of your vector in a new object. Exercise: Use the function mean to get the average of this list of numbers: 387, 964, 14, -350. Store this list of numbers in a vector called **x**.
 
 **Review**
 
-| Symbol | Meaning | | -------|---------| | `?` | help | | `c()` | combine | | `#` | comment | | `:` | sequence | | `<-` | assignment | | `[ ]` | selection |
-
-Getting help\*\*
-================
-
-There are many ways to get help with R and RStudio, including functionality built into the program. Search using the help tab on the lower right, or use the question mark function. Let's see if there is an easy way to find the mean of a sequence of numbers
-
-``` r
-?mean
-```
-
-`mean` is an example of a function in R. The help documentation shows an example usage with the name of the function, an open parenthesis, x, and a close parenthesis. (Let's ignore the ellipsis for now.)
-
-> Exercise: Use the function mean to get the average of this list of numbers: 387, 964, 14, -350 (put numbers on etherpad)
-
-``` r
-x <- c(387,964,14,-350)
-mean(x)
-```
-
-    ## [1] 253.75
+| Symbol | Meaning    |
+|--------|------------|
+| `?`    | help       |
+| `c()`  | combine    |
+| `#`    | comment    |
+| `:`    | sequence   |
+| `<-`   | assignment |
+| `[ ]`  | selection  |
 
 Data frames
 ===========
 
-To store information alongside those values, we could combine `x` with a vector of names associated with each one of the values. Just as before, make a vector using `c()` but be sure to put each item in the list in quotes. This means it will be interpreted as a **string** or word, instead of a variable.
+Data frames are spreadsheet-like data strcutures in R. Each column of a data frame is a vector.
+
+> Make a vector using `c()` but now put each item in the list in quotes. This means it will be interpreted as a **string** or word, instead of a number.
 
 ``` r
 animals <- c("pig", "dog", "cat", "bunny") 
 ```
 
-Combine `x` and `animals` into a **data frame** with the aptly named function `data.frame()`. Note the period between the words. Store your data frame as an object called `mydata`.
+> Combine `x` and `animals` into a **data frame** with the aptly named function `data.frame()`. Note the period between the words. Store your data frame as an object called `my_df`.
 
 ``` r
-mydata <- data.frame(animals, x)
-mydata
+my_df <- data.frame(animals, x)
+my_df
 ```
 
     ##   animals    x
@@ -161,12 +172,20 @@ mydata
     ## 3     cat   14
     ## 4   bunny -350
 
-> Exercise: Use a function to determine many rows and columns are in your data
+**Some helpful functions for getting to know your data frame**
 
-Another helpful function to know about is `str()` for structure. Easily find out information about each of the objects in your environment with the `str` function.
+| function    | returns              |
+|-------------|----------------------|
+| `dim()`     | dimensions           |
+| `nrow()`    | number of rows       |
+| `ncol()`    | number of columns    |
+| `names()`   | (column) names       |
+| `str()`     | structure            |
+| `summary()` | summary info         |
+| `head()`    | shows beginning rows |
 
 ``` r
-str(mydata)
+str(my_df)
 ```
 
     ## 'data.frame':    4 obs. of  2 variables:
@@ -178,21 +197,29 @@ Where else can you find this information easily?
 -   In the Environment window
 -   Opening up the objects in the viewer
 
+Data frames are 2-dimensional and can contain heterogenous data like numbers in one column and categories in another. Other types of data in R can be described according to these categories
+
+| Homogeneous | Heterogeneous |
+|-------------|---------------|------------|
+| 1d          | Atomic vector | List       |
+| 2d          | Matrix        | Data frame |
+| nd          | Array         |
+
 Loading data into R
 ===================
 
-Now let's ingest your data into R in a way that makes it easy to work with. Data could live on a disk, in a database, or on the web. Our focus right now is when data lives on a disk. We will move later into when data lives on a database or on the web.
+Now let's ingest your data into R in a way that makes it easy to work with. Data could live on a disk, in a database, or on the web. Our focus right now is when data lives on a disk.
 
 This is data on a small mammal community in southern Arizona over the last 35 years. This is part of a larger project studying the effects of rodents and ants on the plant community. The rodents are sampled on a series of 24 plots, with different experimental manipulations of which rodents are allowed to access the plots. This is a real dataset that has been used in over 100 publications. It's been simplified just a little bit for the workshop, but you can download the [full dataset](http://esapubs.org/archive/ecol/E090/118/) and work with it using exactly the same tools we'll learn about today.
 
 Read in your data
 -----------------
 
-The data are on SESYNC servers in a '/nfs/public-data/ci-spring2016/'
-
 The data we are going to use is in a folder on the sesync storage space that you can access through RStudio. "public-data" is a folder just like many of you will have for your projects.
 
-We will use the function `read.csv()` that reads in a file by passing it the location of the file. The general syntax for the functions to read in data are to give the path to the file name, and then supply optinal additional arguments as necessary like specifying column types. If you don't specify what argument you are giving it, R will use the defaults, which we will do for now.
+The file path to the data for this lesson is: `"/nfs/public-data/ci-spring2016/"`.
+
+We will use the function `read.csv()` that reads in a file by passing it the location of the file. The general syntax for the functions to read in data are to give the path to the file name, and then supply optinal additional arguments as necessary like specifying the type of data in each column. If you don't specify what argument you are giving it, R will use the defaults, which we will do for now.
 
 ``` r
 read.csv(file="/nfs/public-data/ci-spring2016/Data/plots.csv")
@@ -224,12 +251,16 @@ read.csv(file="/nfs/public-data/ci-spring2016/Data/plots.csv")
     ## 23      23          Rodent Exclosure
     ## 24      24          Rodent Exclosure
 
-Remember to use the assignment operator "&lt;-" to store that data in memory and work with it
+Type a comma after the file name and then press **tab** to view other arguments that this function takes. Hovering over each item in the list will show a description of that argument from the help documentation about that function. Note that if you are using standalone RStudio on your computer (e.g. if you do not have internet access), you will probably need to change these file paths.
+
+> Use the assignment operator "&lt;-" to store that data in memory and work with it
 
 ``` r
 plots <- read.csv(file="/nfs/public-data/ci-spring2016/Data/plots.csv")
 surveys <- read.csv(file="/nfs/public-data/ci-spring2016/Data/surveys.csv")
 ```
+
+A data.frame is one of the most commonly used objects in R. Just think of a data.frame like a table, or a spreadsheet, with rows and columns and numbers, text, etc. in the cells. A very special thing about the data.frame in R is that it can handle multiple types of data - that is, each column can have a different type.
 
 Viewing data frames
 -------------------
@@ -264,44 +295,7 @@ head(plots)
     ## 5       5          Rodent Exclosure
     ## 6       6 Short-term Krat Exclosure
 
-Some basic math functions in R
-------------------------------
-
-``` r
-*, +, -, /, ^, %%, %/%
-abs, sign
-acos, asin, atan, atan2
-sin, cos, tan
-ceiling, floor, round, trunc, signif
-exp, log, log10, log2, sqrt
-
-max, min, prod, sum
-cummax, cummin, cumprod, cumsum, diff
-pmax, pmin
-range
-mean, median, cor, sd, var
-rle
-```
-
-Data types in R
-===============
-
-After reading in the Surveys and Plots csv files, let's explore what types of data are in each column and what kind of structure your data has. There are several ways to do this in RStudio.
-
-Get quick overview
-------------------
-
-Some handy functions to get a quick idea of your data:
-
-| function | returns              |
-|----------|----------------------|
-| dim      | dimensions           |
-| nrow     | number of rows       |
-| ncol     | number of columns    |
-| names    | (column) names       |
-| str      | structure            |
-| summary  | summary info         |
-| head     | shows beginning rows |
+After reading in the Surveys and Plots csv files, let's explore what types of data are in each column and what kind of structure your data has.
 
 ``` r
 str(plots)
@@ -359,18 +353,15 @@ summary(surveys)
     ##  Max.   :24.0   DS     : 2504             Max.   :70.00   Max.   :280.00  
     ##                 (Other):10799             NA's   :4111    NA's   :3266
 
-The data we read in are stored in a **data frame**. A data frame is the most common way of storing data in R, and if used systematically makes data analysis easier. Under the hood, a data frame is a list of equal-length vectors. This makes it a 2-dimensional structure, much like an Excel spreadsheet. This means that a data frame has names(), colnames(), and rownames(), although names() and colnames() are the same thing. The length() of a data frame is the length of the underlying list and so is the same as ncol(); nrow() gives the number of rows.
-
-A data.frame is one of the most commonly used objects in R. Just think of a data.frame like a table, or a spreadsheet, with rows and columns and numbers, text, etc. in the cells. A very special thing about the data.frame in R is that it can handle multiple types of data - that is, each column can have a different type.
-
 Each column in a data frame can be referred to using the `$` operator and the data frame name and the column name. `surveys$record_id` refers to the record\_id column in the surveys data frame.
 
 Types of Vectors
-----------------
+================
 
-There are four common types of atomic vectors: logical, integer, double (often called numeric), and character. There are two rare types: complex and raw. All elements of an atomic vector must be the same type, so when you attempt to combine different types they will be coerced to the most flexible type. Types from least to most flexible are: logical, integer, double, and character.
+There are four common types of atomic vectors: logical, integer, double (often called numeric), and character. There are two rare types that we will not cover: complex and raw. All elements of an atomic vector must be the same type, so when you attempt to combine different types they will be coerced to the most flexible type. Types from least to most flexible are: logical, integer, double, and character.
 
-### Characters
+Characters
+----------
 
 Character data (words) in base R is read in as a factor by default, ie. stored as integers. In read\_csv or readxl that is not the default (but you can specify the column types if you want, or convert to factors with as.factor())
 
@@ -390,11 +381,13 @@ head(surveys)
 
 You can specify what indicates missing data in the read.csv or read\_csv functions using either na.strings = "NA" or na = "NA". You can also specify multiple things to be interpreted as missing values, such as na = c("missing", "no data", "&lt; 0.05 mg/L", "XX")
 
-### Numbers and integers
+Numbers and integers
+--------------------
 
 Most of the rows in the surveys data frame are numbers and integers. Data that are strictly positive whole numbers are stored as integers.
 
-### Factors
+Factors
+-------
 
 A factor is a vector that can contain only predefined values, and is used to store categorical data. Factors are built on top of integer vectors using two attributes: the class(), “factor”, which makes them behave differently from regular integer vectors, and the levels(), which defines the set of allowed values.
 
@@ -422,7 +415,8 @@ summary(surveys)
     ##  Max.   :24.0   DS     : 2504             Max.   :70.00   Max.   :280.00  
     ##                 (Other):10799             NA's   :4111    NA's   :3266
 
-### Logical data (True or False)
+Logical data (True or False)
+----------------------------
 
 Logical data is stored as either a 1 or 0, True or False. Logical vectors can be created using **logical operators**
 
@@ -438,7 +432,7 @@ Logical data is stored as either a 1 or 0, True or False. Logical vectors can be
 | x      | y                        |
 | x & y  | x AND y                  |
 
-Make a new column with a logical data type based on some condition (e.g. whether the taxa was censused). Verify that is is logical (what are several ways to do this?)
+> Make a new column with a logical data type based on some condition (e.g. whether the taxa was censused). Verify that is is logical (what are several ways to do this?)
 
 ``` r
 plots$control <- plots$plot_type=="Control"
@@ -468,11 +462,14 @@ summary(plots)
     ##  3rd Qu.:18.25   Spectab exclosure        :2                  
     ##  Max.   :24.00
 
-### Lists
+Lists
+-----
 
-Lists are different from vectors because their elements can be of any type, including lists. You construct lists by using list() instead of c()
+Lists like vectors but their elements can be of any type, including another list! You construct lists by using `list()` instead of `c()`.
 
-c() will combine several lists into one. If given a combination of atomic vectors and lists, c() will coerce the vectors to lists before combining them. Compare the results of list() and c()
+`c()` will combine several lists into one. If given a combination of atomic vectors and lists, `c()` will coerce the vectors to lists before combining them.
+
+> Compare the results of `list()` and `c()`
 
 ``` r
 x <- list(list(1, 2), c(3, 4))
@@ -496,26 +493,24 @@ str(y)
     ##  $ : num 3
     ##  $ : num 4
 
-Lists are used to build up many of the more complicated data structures in R
+Lists are used to build up many of the more complicated data structures in R. Under the hood, data frames are actually lists of vectors.
 
 Basic Manipulation of Data frames
 =================================
 
-R has powerful subsetting capabilities that can be accessed very concisely using square brackets. The square brackets work as follows: anything before the comma refers to the rows that will be selected, anything after the comma refers to the number of columns that should be returned.
+R has powerful subsetting capabilities that can be accessed very concisely using square brackets. Just like vectors, data frames can be subset and manipulated with square brackets The square brackets work as follows: anything before the comma refers to the rows that will be selected, anything after the comma refers to the number of columns that should be returned.
 
 Subsetting with brackets
 ------------------------
 
-Some ways to subset vectors with bracket notation \[\]
+Some ways to subset vectors with bracket notation `[]`.
 
 1.  **positive integers**: return elements at the specified positions
 2.  **Negative integers**: omit elements at the specified positions
 3.  **Logical vectors**: select elements where the corresponding logical value is TRUE
 4.  **Nothing**: returns the original vector (more useful for dataframes)
 
--   what happens combining positive and negative integers? (error)
--   what happens when logical vector is shorter than the vector being subset? (recycled)
--   A missing value in the index always yields a missing value in the output
+-   What happens combining positive and negative integers?
 
 > Exercise: Fix each of the following common data frame subsetting errors:
 
@@ -529,16 +524,18 @@ plots[plots$plot_id == 4 | 6, ]
 Subsetting with $ and double brackets
 -------------------------------------
 
--   There are two other subsetting operators: \[\[ and $. \[\[ is similar to \[, except it can only return a single value and it allows you to pull pieces out of a list. $ is a useful shorthand for \[\[ combined with character subsetting.
+-   There are two other subsetting operators: `[[` and `$`. `[[` is similar to `[`, except it can only return a single value and it allows you to pull pieces out of a list. `$` is a useful shorthand for `[[` combined with character subsetting.
 
 > “If list x is a train carrying objects, then x\[\[5\]\] is the object in car 5; x\[4:6\] is a train of cars 4-6.” — @RLangTip
+
+> Use double bracket notation to extract the animals vector from your data frame
 
 Subsetting and assignment
 -------------------------
 
 All subsetting operators can be combined with assignment to modify selected values of the input vector.
 
-With lists, you can use subsetting + assignment + NULL to remove components from a list. To add a literal NULL to a list, use \[ and list(NULL):
+With lists, you can use subsetting + assignment + `NULL` to remove components from a list. To add a literal `NULL` to a list, use `[` and `list(NULL)`. Notice the difference in the structure of `x` and `y`:
 
 ``` r
 x <- list(a = 1, b = 2)
@@ -564,18 +561,14 @@ Selecting rows based on a condition
 
 Because it allows you to easily combine conditions from multiple columns, logical subsetting is probably the most commonly used technique for extracting rows out of a data frame.
 
-`subset()` is a specialised shorthand function for subsetting data frames, and saves some typing because you don’t need to repeat the name of the data frame
-
-Data frames are 2-dimensional and can contain heterogenous data like numbers in one column and categories in another. Other types of data in R can be described according to these categories
-
-||Homogeneous | Heterogeneous| |----|----|---| |1d | Atomic vector | List| |2d | Matrix | Data frame | |nd | Array ||
+`subset()` is a specialised shorthand function for subsetting data frames, and saves some typing because you don’t need to repeat the name of the data frame.
 
 Base plotting
 =============
 
-Now we're going to go over some of the ways to make figures in base R. After lunch we'll cover some advanced plotting with ggplot2.
+Now we're going to go over some of the ways to make figures in base R. See [here](https://github.com/SESYNC-ci/CSI-2015/blob/master/Lessons/R/ggplot2.md) for another lesson on advanced plotting with ggplot2.
 
-The `plot()` function is the most basic plotting function. It is polymorphic, ie. uses the input data to determine plot type.
+The `plot()` function is the most basic plotting function. It is polymorphic, ie. it uses the information you give it to determine what kind of plot to make.
 
 Scatterplots
 ------------
@@ -586,19 +579,19 @@ basic syntax is `plot(x, y)` or `plot(y ~ x)`
 plot(surveys$month, surveys$weight)
 ```
 
-![](basicR_files/figure-markdown_github/unnamed-chunk-24-1.png)<!-- -->
+![](basicR_files/figure-markdown_github/unnamed-chunk-23-1.png)<!-- -->
 
 ``` r
 plot(surveys$year, surveys$weight)
 ```
 
-![](basicR_files/figure-markdown_github/unnamed-chunk-24-2.png)<!-- -->
+![](basicR_files/figure-markdown_github/unnamed-chunk-23-2.png)<!-- -->
 
 ``` r
 plot(surveys$year, log(surveys$weight))
 ```
 
-![](basicR_files/figure-markdown_github/unnamed-chunk-24-3.png)<!-- -->
+![](basicR_files/figure-markdown_github/unnamed-chunk-23-3.png)<!-- -->
 
 Histograms
 ----------
@@ -607,37 +600,37 @@ Histograms
 hist(surveys$weight)
 ```
 
-![](basicR_files/figure-markdown_github/unnamed-chunk-25-1.png)<!-- -->
+![](basicR_files/figure-markdown_github/unnamed-chunk-24-1.png)<!-- -->
 
 ``` r
 hist(log(surveys$weight))
 ```
 
-![](basicR_files/figure-markdown_github/unnamed-chunk-25-2.png)<!-- -->
+![](basicR_files/figure-markdown_github/unnamed-chunk-24-2.png)<!-- -->
 
 Boxplots
 --------
 
-Use a boxplot to compare the number of species seen each year.
+> Use a boxplot to compare the number of species seen each year.
 
 ``` r
 par(mfrow=c(1,1))
 boxplot(surveys$weight ~ surveys$year)
 ```
 
-![](basicR_files/figure-markdown_github/unnamed-chunk-26-1.png)<!-- -->
+![](basicR_files/figure-markdown_github/unnamed-chunk-25-1.png)<!-- -->
 
 ``` r
 boxplot(surveys$weight ~ surveys$month)
 ```
 
-![](basicR_files/figure-markdown_github/unnamed-chunk-26-2.png)<!-- -->
+![](basicR_files/figure-markdown_github/unnamed-chunk-25-2.png)<!-- -->
 
 ``` r
 boxplot(log(surveys$weight) ~ surveys$year)
 ```
 
-![](basicR_files/figure-markdown_github/unnamed-chunk-26-3.png)<!-- -->
+![](basicR_files/figure-markdown_github/unnamed-chunk-25-3.png)<!-- -->
 
 Graphical parameters
 --------------------
@@ -648,7 +641,7 @@ Graphical parameters
 Mulit-panel plots
 -----------------
 
-Multi-panel plots can be made by changing the graphical parameters with the par() function.
+Multi-panel plots can be made by changing the graphical parameters with the `par()` function.
 
 ``` r
 surveys1990 <- subset(surveys, year == 1990)
@@ -659,9 +652,7 @@ hist(log(surveys1990$weight))
 hist(log(surveys1996$weight))
 ```
 
-![](basicR_files/figure-markdown_github/unnamed-chunk-27-1.png)<!-- -->
-
-We know that the dates columns are exactly the same for the no\_species dataframe and the weights dataframe, so we can just add the Totalwgt column to the species dataframe. If the dates were different we might do a join.
+![](basicR_files/figure-markdown_github/unnamed-chunk-26-1.png)<!-- -->
 
 Saving figures
 --------------
@@ -674,11 +665,7 @@ plot(x, y)
 dev.off()
 ```
 
-Remember that by default your file will be saved in your working directory
-
--   pdf()
--   png()
--   postscript()
+By default your file will be saved in your current working directory.
 
 Writing your own functions
 ==========================
@@ -732,7 +719,8 @@ We can generalize the calculation that we made by storing it as a **function** c
 ``` r
 stderr <- function(x){
   # this function returns the standard error of the mean
-  sqrt(var(x)/length(x))}
+  sqrt(var(x)/length(x))
+  }
 ```
 
 > Exercise: Calculate the standard error of the mean for the subset of surveys done in 1990. Calculate the standard error of the mean for all surveys done in the month of June
@@ -744,3 +732,4 @@ Additional resources and references
 -   [keyboard shortcuts in RStudio](https://support.rstudio.com/hc/en-us/articles/200711853-Keyboard-Shortcuts)
 -   [R Graph catalog](http://shiny.stat.ubc.ca/r-graph-catalog/)
 -   [Intro R Shiny app](http://www.intro-stats.com/)
+-   Learn about cutomizing the appearance and funcitonality of RStudio [here](https://support.rstudio.com/hc/en-us/articles/200549016-Customizing-RStudio) such as the color theme, default pane arrangement, and how line wrapping is handled.
