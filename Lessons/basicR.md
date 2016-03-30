@@ -199,11 +199,11 @@ Where else can you find this information easily?
 
 Data frames are 2-dimensional and can contain heterogenous data like numbers in one column and categories in another. Other types of data in R can be described according to these categories
 
-| Homogeneous | Heterogeneous |
-|-------------|---------------|------------|
-| 1d          | Atomic vector | List       |
-| 2d          | Matrix        | Data frame |
-| nd          | Array         |
+| Dimensions | Homogeneous   | Heterogeneous |
+|------------|---------------|---------------|
+| 1d         | Atomic vector | List          |
+| 2d         | Matrix        | Data frame    |
+| nd         | Array         |
 
 Loading data into R
 ===================
@@ -219,7 +219,7 @@ The data we are going to use is in a folder on the sesync storage space that you
 
 The file path to the data for this lesson is: `"/nfs/public-data/ci-spring2016/"`.
 
-We will use the function `read.csv()` that reads in a file by passing it the location of the file. The general syntax for the functions to read in data are to give the path to the file name, and then supply optinal additional arguments as necessary like specifying the type of data in each column. If you don't specify what argument you are giving it, R will use the defaults, which we will do for now.
+We will use the function `read.csv()` that reads in a file by passing it the location of the file. The general syntax for the functions to read in data are to give the path to the file name, and then supply optinal additional arguments as necessary like specifying the type of data in each column. Type a comma after `read.csv(` and then press **tab** to see what arguments that this function takes. Hovering over each item in the list will show a description of that argument from the help documentation about that function. Specify the values to use for an argument using the syntax `name = value`.
 
 ``` r
 read.csv(file="/nfs/public-data/ci-spring2016/Data/plots.csv")
@@ -251,7 +251,7 @@ read.csv(file="/nfs/public-data/ci-spring2016/Data/plots.csv")
     ## 23      23          Rodent Exclosure
     ## 24      24          Rodent Exclosure
 
-Type a comma after the file name and then press **tab** to view other arguments that this function takes. Hovering over each item in the list will show a description of that argument from the help documentation about that function. Note that if you are using standalone RStudio on your computer (e.g. if you do not have internet access), you will probably need to change these file paths.
+Note that if you are using standalone RStudio on your computer (e.g. if you do not have internet access), you will probably need to change these file paths.
 
 > Use the assignment operator "&lt;-" to store that data in memory and work with it
 
@@ -358,14 +358,22 @@ Each column in a data frame can be referred to using the `$` operator and the da
 Types of Vectors
 ================
 
-There are four common types of atomic vectors: logical, integer, double (often called numeric), and character. There are two rare types that we will not cover: complex and raw. All elements of an atomic vector must be the same type, so when you attempt to combine different types they will be coerced to the most flexible type. Types from least to most flexible are: logical, integer, double, and character.
+There are four common types of atomic vectors:
 
-Characters
-----------
+-   logical
+-   integer
+-   numeric
+-   character
 
-Character data (words) in base R is read in as a factor by default, ie. stored as integers. In read\_csv or readxl that is not the default (but you can specify the column types if you want, or convert to factors with as.factor())
+There are two rare types that we will not cover: complex and raw. All elements of an atomic vector must be the same type, so when you attempt to combine different types they will be coerced to the most flexible type. Types from least to most flexible are: logical, integer, double, and character.
 
-In surveys table, what is the difference between an NA in the species column vs NA in the wgt column?
+Character data (words) in base R is read in as a factor by default, ie. stored as integers.
+
+You can specify what indicates missing data in the read.csv function using either `na.strings = "NA"` or `na = "NA"`. You can also specify multiple things to be interpreted as missing values, such as `na.strings = c("missing", "no data", "< 0.05 mg/L", "XX")`.
+
+Most of the rows in the surveys data frame are numbers and integers. Data that are strictly positive whole numbers are stored as integers.
+
+> Look at the types of data stored in each of the columns in your data frames.
 
 ``` r
 head(surveys)
@@ -379,12 +387,20 @@ head(surveys)
     ## 5         5     7  16 1977       3         DM   M              35     NA
     ## 6         6     7  16 1977       1         PF   M              14     NA
 
-You can specify what indicates missing data in the read.csv or read\_csv functions using either na.strings = "NA" or na = "NA". You can also specify multiple things to be interpreted as missing values, such as na = c("missing", "no data", "&lt; 0.05 mg/L", "XX")
+``` r
+str(surveys)
+```
 
-Numbers and integers
---------------------
-
-Most of the rows in the surveys data frame are numbers and integers. Data that are strictly positive whole numbers are stored as integers.
+    ## 'data.frame':    35549 obs. of  9 variables:
+    ##  $ record_id      : int  1 2 3 4 5 6 7 8 9 10 ...
+    ##  $ month          : int  7 7 7 7 7 7 7 7 7 7 ...
+    ##  $ day            : int  16 16 16 16 16 16 16 16 16 16 ...
+    ##  $ year           : int  1977 1977 1977 1977 1977 1977 1977 1977 1977 1977 ...
+    ##  $ plot_id        : int  2 3 2 7 3 1 2 1 1 6 ...
+    ##  $ species_id     : Factor w/ 49 levels "","AB","AH","AS",..: 17 17 13 13 13 24 23 13 13 24 ...
+    ##  $ sex            : Factor w/ 3 levels "","F","M": 3 3 2 3 3 3 2 3 2 2 ...
+    ##  $ hindfoot_length: int  32 33 37 36 35 14 NA 37 34 20 ...
+    ##  $ weight         : int  NA NA NA NA NA NA NA NA NA NA ...
 
 Factors
 -------
@@ -676,6 +692,7 @@ If your calculations are performed through a series of functions, then the proje
 
 Three components of functions
 
+-   **name**: descriptive name that does not start with a number
 -   **body**: the code inside the function
 -   **arguments**: control how you can call the function
 
