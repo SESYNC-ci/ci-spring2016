@@ -170,7 +170,7 @@ It is also possible to render reactive input objects using the `renderUI()` and 
 
   output$taxa_plot <- renderPlot({
     taxa_subset <- filter(species, taxa == input$pick_taxa) %>%
-      select(species_id)
+      dplyr::select(species_id)
     surveys_subset <- filter(surveys, species_id %in% taxa_subset)
     barplot(table(surveys_subset$year))
   })
@@ -245,7 +245,7 @@ fluidPage(
 # in server
   output$surveys_subset <- renderDataTable({
     taxa_subset <- filter(species, taxa == input$pick_taxa) %>%
-      select(species_id)
+      dplyr::select(species_id)
     surveys_subset <- filter(surveys, species_id %in% taxa_subset & month %in% input$pick_months[1]:input$pick_months[2])
     return(surveys_subset)
   })
@@ -333,7 +333,7 @@ The diagram above depicts the new relationship between input objects and reactiv
 
   surveys_subset <- reactive({
     taxa_subset <- filter(species, taxa == input$pick_taxa) %>%
-      select(species_id)
+      dplyr::select(species_id)
     # taxa_subset <- subset(species, taxa == input$pick_taxa, select = species_id) # if dplyr not loaded
     surveys_subset <- filter(surveys, species_id %in% taxa_subset)
     return(surveys_subset)
@@ -515,7 +515,7 @@ huc_md <- gIntersection(huc, state_md, byid = TRUE,
                         id = paste(1:length(huc), huc$HUC_NAME))
 ```
 
-Add the watershed boundaries in maryland layer to the map using `addPolygons()`. Overlay the NLCD pasture data using `addRasterImage()`.
+Add the watershed boundaries in maryland layer to the map using `addPolygons()`. Overlay the NLCD data using `addRasterImage()`.
 
 ``` r
 # in server
