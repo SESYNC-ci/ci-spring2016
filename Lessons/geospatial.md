@@ -98,9 +98,11 @@ over(sesync, counties_md)
     ##        ALAND    AWATER
     ## 1 1074549135 447837598
 
-### Exercise
+### Exercise 1
 
 Produce a map of Maryland counties with Frederick County colored in red.
+
+[View solution](#solution-1)
 
 Coordinate transformations
 --------------------------
@@ -178,9 +180,11 @@ text(coordinates(huc_md), labels = names(huc_md), cex = 0.6, srt = 30)
 
 The rgeos package also includes functions to create a buffer of specific width around a geometry (`gBuffer`), to calculate the shortest distance between geometries (`gDistance`) and the area of polygons (`gArea`). Keep in mind however that all these functions use planar geometry equations and thus become less precise over larger distances, as the effect of the Earth's curvature become non-negligible. To calculate geodesic distances that account for that curvature, check the **geosphere** package.
 
-### Exercise
+### Exercise 2
 
 Create a 5km buffer around the *state\_md* borders and plot it as a dotted line (`plot(..., lty = "dotted")`) on the same map. *Hint*: Check the layer's units with `proj4string()` and express any distance in those units.
+
+[View solution](#solution-2)
 
 Working with raster data
 ------------------------
@@ -289,9 +293,11 @@ plot(nlcd_agg)
 
 Here, `fact = 5` means that we are aggregating blocks 5 x 5 pixels and `fun = modal` indicates that the aggregate value is the mode of the original pixels (averaging would not work since land cover is a categorical variable).
 
-### Exercise
+### Exercise 3
 
 Which proportion of `nlcd` pixels are covered by deciduous forest (value = 41)? *Hint*: Use `cellStats`.
+
+[View solution](#solution-3)
 
 The extract function
 --------------------
@@ -373,3 +379,40 @@ R. Lovelace, J. Cheshire et al., Introduction to visualising spatial data in R. 
 F. Rodriguez-Sanchez. Spatial data in R: Using R as a GIS. <http://pakillo.github.io/R-GIS-tutorial/>
 
 CRAN Task View: Analysis of Spatial Data. <https://cran.r-project.org/web/views/Spatial.html>
+
+Exercise solutions
+------------------
+
+### Solution 1
+
+Produce a map of Maryland counties with Frederick County colored in red.
+
+``` r
+plot(counties_md)
+frederick <- counties_md[counties_md$NAME == "Frederick", ]
+plot(frederick, add = TRUE, col = "red")
+```
+
+[Return](#exercise-1)
+
+### Solution 2
+
+Create a 5km buffer around the *state\_md* borders and plot it as a dotted line (`plot(..., lty = "dotted")`) on the same map.
+
+``` r
+buffer <- gBuffer(state_md, width = 5000)
+plot(state_md)
+plot(buffer, lty = "dotted", add = TRUE)
+```
+
+[Return](#exercise-2)
+
+### Solution 3
+
+Which proportion of `nlcd` pixels are covered by deciduous forest (value = 41)?
+
+``` r
+cellStats(nlcd == 41, "mean")
+```
+
+[Return](#exercise-3)
