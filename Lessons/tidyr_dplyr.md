@@ -90,9 +90,11 @@ counts_spread
 
 Why are `species` and `count` not quoted here? (They refer to existing column names.)
 
-### Exercise
+### Exercise 1
 
 Try removing a row from `counts_gather` (e.g. `counts_gather <- counts_gather[-8, ]`). How does that affect the outcome of `spread`? Let's say the missing row means that no individual of that species was recorded on that day. How can you reflect that assumption in the outcome of `spread`? (Hint: Look at the help file for that function.)
+
+[View solution](#solution-1)
 
 Key functions in dplyr
 ----------------------
@@ -187,9 +189,11 @@ head(sorted1)
     ## 5     17359     3  30       3         SH   F              31     77
     ## 6     17170     2  25       3         SH   M              30     80
 
-### Exercise
+### Exercise 2
 
 Write code that returns the *record\_id*, *sex* and *weight* of all surveyed individuals of *Reithrodontomys montanus* (RO).
+
+[View solution](#solution-2)
 
 Grouping and aggregation
 ------------------------
@@ -218,9 +222,11 @@ A few notes on these functions:
 -   `group_by` makes no changes to the data frame values, but it adds metadata -- in the form of R *attributes* -- to identify groups. You can see those attributes either by running the `str()` function on the data frame or by inspecting it in the RStudio *Environment* pane.
 -   You can add multiple variables (separated by commas) in `group_by`; each distinct combination of values across these columns defines a different group. You can also define more than one summary variable in a single call to `summarize`.
 
-### Exercise
+### Exercise 3
 
 Write code that returns the average weight and hindfoot length of *Dipodomys merriami* (DM) individuals observed in each month (irrespective of the year). Make sure to exclude *NA* values.
+
+[View solution](#solution-3)
 
 Transformation of variables
 ---------------------------
@@ -292,12 +298,14 @@ By inspecting the *counts\_1990w\_join* data frame, you may notice that the last
 counts_1990w_join <- left_join(counts_1990w, species)
 ```
 
-### Exercise
+### Exercise 4
 
 We often use `group_by` along with `summarize`, but you can also apply `filter` and `mutate` operations on groups. Try it out and answer one or both of the following queries:
 
 -   Return only the rows in *counts\_1990w\_join* that correspond to the most common species in each genus.
 -   Calculate the fraction of total counts by taxa (birds or rodents) represented by each species within that taxon.
+
+[View solution](#solution-4)
 
 Chaining operations with pipes (%&gt;%)
 ---------------------------------------
@@ -332,3 +340,58 @@ Additional information
 [Data wrangling with dplyr and tidyr (RStudio cheat sheet)](http://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf)
 
 One of several cheat sheets available on the RStudio website, it provides a brief, visual summary of all the key functions discussed in this lesson. It also lists some of the auxiliary functions that can be used within each type of expression, e.g. aggregation functions for summarize, "moving window" functions for mutate, etc.
+
+Exercise solutions
+------------------
+
+### Solution 1
+
+If any species/day combination is missing, the corresponding cell after `spread` is filled with `NA`. To interpret missing values as zero counts, use the optional `fill` argument:
+
+``` r
+counts_spread <- spread(counts_gather, key = species, value = count, fill = 0)
+```
+
+[Return](#exercise-1)
+
+### Solution 2
+
+Write code that returns the *record\_id*, *sex* and *weight* of all surveyed individuals of *Reithrodontomys montanus* (RO).
+
+``` r
+surveys_RO <- filter(surveys, species_id == "RO")
+select(surveys_RO, record_id, sex, weight)
+```
+
+[Return](#exercise-2)
+
+### Solution 3
+
+Write code that returns the average weight and hindfoot length of *Dipodomys merriami* (DM) individuals observed in each month (irrespective of the year). Make sure to exclude *NA* values.
+
+``` r
+surveys_dm <- filter(surveys, species_id == "DM")
+surveys_dm <- group_by(surveys_dm, month)
+summarize(surveys_dm, avg_wgt = mean(weight, na.rm = TRUE),
+          avg_hfl = mean(hindfoot_length, na.rm = TRUE))
+```
+
+[Return](#exercise-3)
+
+### Solution 4
+
+Return only the rows in *counts\_1990w\_join* that correspond to the most common species in each genus.
+
+``` r
+counts_1990w_join <- group_by(counts_1990w_join, genus)
+filter(counts_1990w_join, count == max(count))
+```
+
+Calculate the fraction of total counts by taxa (birds or rodents) represented by each species within that taxon.
+
+``` r
+counts_1990w_join <- group_by(counts_1990w_join, taxa)
+mutate(counts_1990w_join, prop_of_taxa = count / sum(count))
+```
+
+[Return](#exercise-4)
