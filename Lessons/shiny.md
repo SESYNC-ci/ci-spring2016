@@ -19,7 +19,9 @@
 Interactive web applications in R
 =================================
 
-This lesson presents an introduction to creating interactive web applications using the [Shiny](https://cran.r-project.org/web/packages/shiny/index.html) package in R. We will learn about the basic building blocks of a Shiny app, how to create interactive elements, customize them, and arrange them on a page by building a Shiny app with parts of the [Portals teaching database](https://github.com/weecology/portal-teachingdb). We will also use [Leaflet](https://rstudio.github.io/leaflet/) to put an map in the app. This lesson builds on concepts covered in the [data manipulation](https://github.com/SESYNC-ci/ci-spring2016/blob/master/Lessons/tidyr_dplyr.md) and [geospatial](https://github.com/SESYNC-ci/ci-spring2016/blob/master/Lessons/geospatial.md) lessons and requires the `shiny`, `dplyr`, and `leaflet` libraries. You can see the final version of the app that we will make [here](https://shiny.sesync.org/apps/csi-spring2016/).
+This lesson presents an introduction to creating interactive web applications using the [Shiny](https://cran.r-project.org/web/packages/shiny/index.html) package in R. We will learn about the basic building blocks of a Shiny app, how to create interactive elements, customize them, and arrange them on a page by building a Shiny app with parts of the [Portals teaching database](https://github.com/weecology/portal-teachingdb). We will also use [Leaflet](https://rstudio.github.io/leaflet/)'s R package to put a map in the app using powerful web-mapping software.
+
+This lesson builds on concepts covered in the [data manipulation](https://github.com/SESYNC-ci/ci-spring2016/blob/master/Lessons/tidyr_dplyr.md) and [geospatial](https://github.com/SESYNC-ci/ci-spring2016/blob/master/Lessons/geospatial.md) lessons and requires the `shiny`, `dplyr`, and `leaflet` libraries. You can see the final version of the app that we will make [here](https://shiny.sesync.org/apps/csi-spring2016/).
 
 File structure
 ==============
@@ -31,6 +33,7 @@ The `shiny` package includes some built-in examples to demonstrate some of its b
 > See how this works by running one of the [built-in examples](http://shiny.rstudio.com/tutorial/lesson1/#Go%20Further) within the shiny package:
 
 ``` r
+library(shiny)
 runExample("01_hello")
 ```
 
@@ -69,7 +72,14 @@ fluidPage()
 function(input, output){}
 ```
 
-> Create a new folder in your current working directory with ui and server files, and then copy the data folder into the app folder. In the ui file, create a title for your app and in the server file, read in the 3 csv files. Run your app using the Run App button.
+> Create a new folder in your current working directory with ui and server files. Set this as your working directory. In the ui file, create a title for your app and in the server file, read in the 3 csv files. Run your app using the Run App button.
+
+**Put required data in app folder** Because the Shiny app is going to be using your local R session to run, it will be able to recognize anything that is loaded into your library. However it is good practice for Shiny apps to keep them "self-contained" and to include all of the Data they rely on within the file folder that contains the ui and server files. Create a new copy of the data from the public data folder into your app directory using the following code:
+
+``` r
+system("cp -R /nfs/public-data/ci-spring2016/Data/ Data/")
+system("cp -R /nfs/public-data/ci-spring2016/Geodata/ Data/")
+```
 
 ``` r
 # ui.R
@@ -96,7 +106,7 @@ function(input, output){
 Input and Output Objects
 ========================
 
-The user interface and the server file interact with each other through **input** and **output** objects. The information in the server file is the recipe for how to construct output objects to display in the ui, and the user's interaction with input objects alters output objects based on the code in the server file. The instructinos for creating input objects are in the ui file. Having your app function as you intend requires careful attention to how your input and output objects relate to each other, i.e. knowing what actions will initiate what sections of code to run at what time.
+The user interface and the server file interact with each other through **input** and **output** objects. The information in the server file is the recipe for how to construct output objects to display in the ui, and the user's interaction with input objects alters output objects based on the code in the server file. The instructions for creating input objects are in the ui file. Having your app function as you intend requires careful attention to how your input and output objects relate to each other, i.e. knowing what actions will initiate what sections of code to run at what time.
 
 ![](shiny_files/arrows1.png) The diagram above depicts how input and output objects are referred to within the ui and server files. Input objects are created and named in the ui file with functions like `selectInput()` or `radioButtons()`. They are used within render functions in the server file to create output objects. Output objects are placed in the ui with output functions like `plotOutput()` or `textOutput()`.
 
@@ -126,7 +136,7 @@ Input objects are **reactive** which means that an update to this value by a use
 -   Choices for inputs can be named using a list to match the display name to the value such as `list("Male" = "M", "Female" = "F")`.
 -   [Selectize](http://shiny.rstudio.com/gallery/selectize-vs-select.html) inputs are a useful option for long drop down lists.
 -   Always be aware of what the default value is for input objects you create.
--   input$value or similar cannot be a column name for ggplot object
+-   If you use an input to choose a column from a data frame, take special care in how to pass the resulting `input$value` to ggplot (use `aes_string` instead of `aes`: <http://docs.ggplot2.org/dev/aes_string.html>) or dplyr functions (use the "standard evaluation" versions of functions: <https://cran.r-project.org/web/packages/dplyr/vignettes/nse.html>)
 
 Output objects
 --------------
@@ -160,7 +170,7 @@ It is also possible to render reactive input objects using the `renderUI()` and 
 
   output$taxa_plot <- renderPlot({
     taxa_subset <- filter(species, taxa == input$pick_taxa) %>%
-      select(species_id)
+      dplyr::select(species_id)
     surveys_subset <- filter(surveys, species_id %in% taxa_subset)
     barplot(table(surveys_subset$year))
   })
@@ -235,7 +245,7 @@ fluidPage(
 # in server
   output$surveys_subset <- renderDataTable({
     taxa_subset <- filter(species, taxa == input$pick_taxa) %>%
-      select(species_id)
+      dplyr::select(species_id)
     surveys_subset <- filter(surveys, species_id %in% taxa_subset & month %in% input$pick_months[1]:input$pick_months[2])
     return(surveys_subset)
   })
@@ -304,7 +314,7 @@ navbarPage("csi app",
 Reactive objects
 ================
 
-Input objects that are used in multiple render functions to create different output objects can be created independently as **reactive** objects. This value is then cached to reduce computation required, since only the code to create this object is re-run when input values are updated. For example, in order to display both the plot and the data used in the plot, we had to duplicate portions of code in the `renderPlot()` and `renderDataTable()` functions.
+When your app inputs serve to create some object that is used in multiple outputs, you can enclose the corresponding code in a **reactive** function. This value is then cached to reduce computation required, since only the code to create this object is re-run when input values are updated. For example, in order to display both the plot and the data used in the plot, we had to duplicate portions of code in the `renderPlot()` and `renderDataTable()` functions.
 
 ![](shiny_files/objects-compare.png)
 
@@ -323,7 +333,7 @@ The diagram above depicts the new relationship between input objects and reactiv
 
   surveys_subset <- reactive({
     taxa_subset <- filter(species, taxa == input$pick_taxa) %>%
-      select(species_id)
+      dplyr::select(species_id)
     # taxa_subset <- subset(species, taxa == input$pick_taxa, select = species_id) # if dplyr not loaded
     surveys_subset <- filter(surveys, species_id %in% taxa_subset)
     return(surveys_subset)
@@ -349,7 +359,7 @@ Download or Upload
 
 It is possible to allow users to upload and download files from a Shiny app, such as a csv file of the currently visible data. Objects to download are output objects created in the server using the function `downloadHandler()` which is analogous to the render functions. That object is made available using a `downloadButton()` or `downloadLink()` function in the ui. The `downloadHandler()` function requires two arguments:
 
--   **filename** which is a string or a function that returns a string ending with a file extention.
+-   **filename** which is a string or a function that returns a string ending with a file extension.
 -   **content** which is a function to generate the content of the file and write it to a temporary file.
 
 Uploading files is possible with the input function `fileInput()` to create an input object. This object is a data frame that contains a column `datapath` which can be used to locate the user's upload file locally within the app. See the [documentation](http://shiny.rstudio.com/reference/shiny/latest/fileInput.html) and [example](http://shiny.rstudio.com/gallery/file-upload.html) for more information.
@@ -390,7 +400,7 @@ Share as files
 --------------
 
 -   email or copy ui.R, server.R, and all required data files
--   use functions in the shiny package to run app from files hosted on the web. For example, the files and data for the shiny app we are building are located in a github repo and can be run using `shiny::runGitHub("khondula/csi-app", "khondula")`
+-   use functions in the shiny package to run app from files hosted on the web. For example, the files and data for the shiny app we are building are located in a github repo and can be run using `shiny::runGitHub("khondula/csi-app")`
 
 Share as a website
 ------------------
@@ -409,12 +419,12 @@ There are many ways to enhance and extend the functionality and sophistication o
 -   shinyjs: Enhance user experience in Shiny apps using JavaScript functions without knowing JavaScript
 -   ggvis: Similar to ggplot2, but the plots are focused on being web-based and are more interactive
 -   leaflet: geospatial mapping
--   dygraphs: time series charting
+-   [dygraphs](http://rstudio.github.io/dygraphs/): time series charting
 -   metricsgraphics: scatterplots and line charts with D3
--   networkD3: graph data visualization with D3
+-   [networkD3](http://christophergandrud.github.io/networkD3/): graph data visualization with D3
+-   [sparklines](https://github.com/htmlwidgets/sparkline): small inline charts
 -   d3heatmap: interactive heatmaps with D3
--   dataTables: tabular data display
--   threejs: 3D scatterplots and globes
+-   [threejs](https://github.com/bwlewis/rthreejs): 3D scatterplots and globes
 -   DiagrammeR: Diagrams and flowcharts
 -   [exploding boxplot](https://rpubs.com/pssguy/143829)
 -   [interaction with table cells](https://yihui.shinyapps.io/DT-click/)
@@ -468,36 +478,77 @@ tabPanel("Map", leafletOutput("sesync_map"))
 
 ![](shiny_files/map2.png)
 
-> Add some more layers to the map to show Maryland counties and overlay the pasture NLCD data.
+Leaflet using the [Web Mercator](http://epsg.io/3857) projection. The use of a (pseudo)-conformal projection is useful for "slippy" web map features of panning and zooming since it preserves a north-up orientation. However because of some [mathematical intricacies of Web Mercator](http://www.hydrometronics.com/downloads/Web%20Mercator%20-%20Non-Conformal,%20Non-Mercator%20(notes).pdf), Leaflet will only convert objects to EPSG:3857 if it can. The Leaflet package in R does [not yet have](https://github.com/rstudio/leaflet/issues/233) the capability to handle objects that are not in common projections like WGS84.
+
+In order to plot the `huc_md` object created in the [geospatial lesson](https://github.com/SESYNC-ci/ci-spring2016/blob/master/Lessons/geospatial.md), we will need to use non-projected coordinates instead of the Alber's equal area projection.
+
+> Read in the counties, watershed boundaries, and NLCD datasets as in the geospatial lesson. Subset the counties to those in MD.
+
+``` r
+library(sp)
+library(rgdal)
+library(rgeos)
+library(raster)
+
+cb_dir <- "/nfs/public-data/census-tiger-2013/cb_2014_us_county_500k"
+
+counties <- readOGR(dsn = file.path(cb_dir, "cb_2014_us_county_500k.shp"),
+                    layer = "cb_2014_us_county_500k", 
+                    stringsAsFactors = FALSE)
+
+huc <- readOGR(dsn = "/nfs/public-data/ci-spring2016/Geodata/huc250k.shp", 
+               layer = "huc250k",
+               stringsAsFactors = FALSE)
+
+nlcd <- raster("/nfs/public-data/ci-spring2016/Geodata/nlcd_agg.grd")
+
+counties_md <- counties[counties$STATEFP == "24", ]  
+```
+
+In order to perform the union and intersection operations but preserve compatability with leaflet, transform the watershed boundaries and maryland counties to unprojected coordinate systems.
+
+``` r
+huc <- spTransform(huc, CRS("+proj=longlat +datum=WGS84"))
+counties_md <- spTransform(counties_md, CRS("+proj=longlat +datum=WGS84"))
+state_md <- gUnaryUnion(counties_md)
+huc_md <- gIntersection(huc, state_md, byid = TRUE, 
+                        id = paste(1:length(huc), huc$HUC_NAME))
+```
+
+Add the watershed boundaries in maryland layer to the map using `addPolygons()`. Overlay the NLCD data using `addRasterImage()`.
 
 ``` r
 # in server
   output$sesync_map <- renderLeaflet({
-    leaflet(counties_md) %>% 
-      setView(lng = -76.505206, lat = 38.9767231, zoom = 14) %>%
+    leaflet(huc_md) %>% 
+      setView(lng = -76.505206, lat = 38.9767231, zoom = 7) %>%
       addProviderTiles("Esri.WorldImagery") %>%
       addMarkers(lng = -76.505206, lat = 38.9767231, popup = "SESYNC") %>%
-      addPolygons(fill = FALSE)   %>%
-      addRasterImage(mask(nlcd, nlcd == 41, maskvalue = FALSE), opacity = 0.5)
+      addPolygons(fill = FALSE)  %>%
+      addRasterImage(nlcd, opacity = 0.5, maxBytes = 10*1024*1024)
+      # addRasterImage(mask(nlcd, nlcd == 41, maskvalue = FALSE), opacity = 0.5)
   })
 ```
 
-![](shiny_files/map3.png)
+![](shiny_files/map3.png) The values of the `zoom` argument in `setView()` are based on zoom levels in tile management schemes. Get a sense for zoom levels of tiles [here](http://www.maptiler.org/google-maps-coordinates-tile-bounds-projection/)
 
-Since drawing maps is computationally intensive, interactivity within the map is typically handed outside of the main render function using a function in the server called `leafletProxy()`, and the static map elements are handled within the first render function. See an example of how to implement this [here](http://www.r-bloggers.com/r-shiny-leaflet-using-observers/) and \[here\](<http://www.r-bloggers.com/climate-projections-by-cities-r-shiny-rcharts-leaflet/>.
+Since drawing maps can be computationally intensive, interactivity within the map is typically handed outside of the main render function using a function in the server called `leafletProxy()`, and the static map elements are handled within the first render function. See an example of how to implement this [here](http://www.r-bloggers.com/r-shiny-leaflet-using-observers/) and [here](http://www.r-bloggers.com/climate-projections-by-cities-r-shiny-rcharts-leaflet/).
 
-We can add some simple interactivity by assigning groups to **layers** and using the `addLayersControl()` function.
+We can add some simple interactivity by assigning groups to **layers** and using the `addLayersControl()` function. See how this works by adding 2 different masks of the nlcd data with an additional argument `group =` in the `addRasterImage()` function. For grouped layers, add a feature to toggle between them with layers control. See documentation on this feature [here](https://rstudio.github.io/leaflet/showhide.html).
 
 ``` r
   output$sesync_map <- renderLeaflet({
-    leaflet(counties_md) %>% 
-      setView(lng = -76.505206, lat = 38.9767231, zoom = 14) %>%
+     leaflet(huc_md) %>% 
+      setView(lng = -76.505206, lat = 38.9767231, zoom = 7) %>%
       addProviderTiles("Esri.WorldImagery") %>%
       addMarkers(lng = -76.505206, lat = 38.9767231, popup = "SESYNC") %>%
-      addPolygons(fill = FALSE)   %>%
-      addRasterImage(mask(nlcd, nlcd == 41, maskvalue = FALSE), opacity = 0.5, group = "Deciduous Forest", colors = "green") %>%
-      addRasterImage(mask(nlcd, nlcd == 81, maskvalue = FALSE), opacity = 0.5, group = "Pasture", colors = "yellow") %>%
-      addLayersControl(baseGroups=c("Deciduous Forest", "Pasture"))
+      addPolygons(fill = FALSE, group = "MD watersheds")   %>%
+      addRasterImage(mask(nlcd, nlcd == 41, maskvalue = FALSE), opacity = 0.5, 
+                     group = "Deciduous Forest", colors = "green") %>%
+      addRasterImage(mask(nlcd, nlcd == 81, maskvalue = FALSE), opacity = 0.5, 
+                     group = "Pasture", colors = "yellow") %>%
+      addLayersControl(baseGroups=c("Deciduous Forest", "Pasture"),
+                       overlayGroups = c("MD watersheds"))
   })
 ```
 
@@ -508,6 +559,7 @@ From RStudio
 ------------
 
 -   [Shiny cheat sheet by RStudio](http://www.rstudio.com/wp-content/uploads/2016/01/shiny-cheatsheet.pdf)
+-   [Shiny webinar chapters](http://shiny.rstudio.com/tutorial/video/) **These are particularly helpful!**
 -   [Shiny tutorial by RStudio](http://shiny.rstudio.com/tutorial/)
 -   [Input widget gallery](http://shiny.rstudio.com/gallery/widget-gallery.html)
 -   [Advanced interactions for plots](https://gallery.shinyapps.io/095-plot-interaction-advanced/)
@@ -531,6 +583,8 @@ Other/ tutorials
 -   <http://www.r-bloggers.com/interactive-mapping-with-leaflet-in-r/>
 -   <http://www.r-bloggers.com/upload-shapefile-to-r-shiny-app-to-extract-leaflet-map-data/>
 -   [Top rated questions about shiny on stackoverflow](http://stackoverflow.com/questions/tagged/shiny?sort=votes&pageSize=15)
+-   <http://www.maptiler.org/google-maps-coordinates-tile-bounds-projection/>
+-   Use the Web Mercator projection for spatial analysis [at your own risk!!](http://earth-info.nga.mil/GandG/wgs84/web_mercator/index.html)
 
 Example Shiny apps
 ------------------
